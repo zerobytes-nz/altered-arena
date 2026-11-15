@@ -1,0 +1,1441 @@
+{
+  "about": "Single source of truth for every art/sound file. The game loads the first of public/<roots.licensed>/<path>, public/<roots.cc0>/<path>, public/<roots.placeholder>/<path> that exists with the right size. Edit this file, then run `npm run assets:placeholders && npm run assets:docs`.",
+  "version": 1,
+  "roots": {
+    "licensed": "assets/licensed",
+    "cc0": "assets/cc0",
+    "placeholder": "assets/placeholder"
+  },
+  "sources": {
+    "craftpix-monsters": {
+      "name": "CraftPix: Free RPG Monster Sprites Pixel Art (6 monsters, 128×128 frames: idle, walk, attack, hurt, death)",
+      "url": "https://craftpix.net/freebies/free-rpg-monster-sprites-pixel-art/",
+      "licence": "craftpix.net Freebies licence: free for commercial and personal projects; the raw files must NOT be redistributed. Keep them in public/assets/licensed/ (gitignored). The licence also bans using the files to train AI.",
+      "licenceUrl": "https://craftpix.net/file-licenses/"
+    },
+    "batareya-frames": {
+      "name": "Batareya: Pixel Art CCG-like Frames (free pack, 25 frames, 64×96)",
+      "url": "https://batareya.itch.io/pixel-art-ccg-like-frames",
+      "licence": "Free for free and commercial projects; may not be redistributed or resold (itch.io page, checked 2026-11-15). Keep it in public/assets/licensed/ (gitignored)."
+    },
+    "fga-magic-fx": {
+      "name": "Free Game Assets (CraftPix): Free Pixel Magic Sprite Effects Pack",
+      "url": "https://free-game-assets.itch.io/free-pixel-magic-sprite-effects-pack",
+      "licence": "CraftPix freebie, name-your-own-price. The itch.io page states no licence; the publisher points to the CraftPix file licence for its packs: no redistribution of the raw files. Keep them in public/assets/licensed/ (gitignored). Check the licence on download.",
+      "licenceUrl": "https://craftpix.net/file-licenses/"
+    },
+    "own": {
+      "name": "Altered Arena original (placeholder generator)",
+      "url": "scripts/placeholder-art.mjs",
+      "licence": "MIT, same as the code. Fine to commit."
+    },
+    "craftpix-knight": {
+      "name": "CraftPix: Knight Character Free Sprite (Swordsman, Spearman, Halberdier)",
+      "url": "https://craftpix.net/freebies/knight-character-free-sprite/",
+      "licence": "craftpix.net Freebies licence: free for commercial and personal projects; the raw files must NOT be redistributed. Keep them in public/assets/licensed/ (gitignored). The licence also bans using the files to train AI.",
+      "licenceUrl": "https://craftpix.net/file-licenses/"
+    },
+    "craftpix-bow-heroes": {
+      "name": "CraftPix: Free Tiny Pixel Hero Sprites with Bow Attacks",
+      "url": "https://craftpix.net/?p=71864",
+      "licence": "craftpix.net Freebies licence: free for commercial and personal projects; the raw files must NOT be redistributed. Keep them in public/assets/licensed/ (gitignored). The licence also bans using the files to train AI.",
+      "licenceUrl": "https://craftpix.net/file-licenses/"
+    },
+    "craftpix-wizards": {
+      "name": "CraftPix: Free Wizard Sprite Sheets Pixel Art (fire mage, light magician, dark magician)",
+      "url": "https://free-game-assets.itch.io/free-wizard-sprite-sheets-pixel-art",
+      "licence": "craftpix.net Freebies licence: free for commercial and personal projects; the raw files must NOT be redistributed. Keep them in public/assets/licensed/ (gitignored). The licence also bans using the files to train AI. (Mirror of a CraftPix freebie; the itch.io page states no licence, so check on download.)",
+      "licenceUrl": "https://craftpix.net/file-licenses/"
+    }
+  },
+  "assets": [
+    {
+      "key": "unit.warrior.idle",
+      "type": "spritesheet",
+      "path": "units/warrior/idle.png",
+      "width": 512,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 4,
+      "displayScale": 1,
+      "usedFor": "unit-card AWI class: Warrior (tank: sword and shield), idle loop (standing in the arena, on cards)",
+      "source": "craftpix-knight",
+      "animation": {
+        "frameRate": 6,
+        "repeat": -1
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "Swordsman: Idle frames (if the pack has no idle animation, pack a few frames of a similar one)"
+    },
+    {
+      "key": "unit.warrior.walk",
+      "type": "spritesheet",
+      "path": "units/warrior/walk.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "unit-card AWI class: Warrior (tank: sword and shield), walk cycle (moving to a target)",
+      "source": "craftpix-knight",
+      "animation": {
+        "frameRate": 10,
+        "repeat": -1
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "Swordsman: Walk frames (if the pack has no walk animation, pack a few frames of a similar one)"
+    },
+    {
+      "key": "unit.warrior.attack",
+      "type": "spritesheet",
+      "path": "units/warrior/attack.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "unit-card AWI class: Warrior (tank: sword and shield), attack (plays once per hit; the hit lands on frame 3)",
+      "source": "craftpix-knight",
+      "animation": {
+        "frameRate": 14,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "Swordsman: Attack frames (if the pack has no attack animation, pack a few frames of a similar one)"
+    },
+    {
+      "key": "unit.warrior.hurt",
+      "type": "spritesheet",
+      "path": "units/warrior/hurt.png",
+      "width": 256,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 2,
+      "displayScale": 1,
+      "usedFor": "unit-card AWI class: Warrior (tank: sword and shield), hurt flinch (plays once when hit hard)",
+      "source": "craftpix-knight",
+      "animation": {
+        "frameRate": 10,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "Swordsman: Hurt frames (if the pack has no hurt animation, pack a few frames of a similar one)"
+    },
+    {
+      "key": "unit.warrior.dead",
+      "type": "spritesheet",
+      "path": "units/warrior/dead.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "unit-card AWI class: Warrior (tank: sword and shield), death (plays once, holds the last frame)",
+      "source": "craftpix-knight",
+      "animation": {
+        "frameRate": 10,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "Swordsman: Dead frames (if the pack has no dead animation, pack a few frames of a similar one)"
+    },
+    {
+      "key": "unit.ranger.idle",
+      "type": "spritesheet",
+      "path": "units/ranger/idle.png",
+      "width": 512,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 4,
+      "displayScale": 1,
+      "usedFor": "unit-card AWI class: Ranger (bow), idle loop (standing in the arena, on cards)",
+      "source": "craftpix-bow-heroes",
+      "animation": {
+        "frameRate": 6,
+        "repeat": -1
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any of the 3 bow heroes: Idle frames (if the pack has no idle animation, pack a few frames of a similar one)"
+    },
+    {
+      "key": "unit.ranger.walk",
+      "type": "spritesheet",
+      "path": "units/ranger/walk.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "unit-card AWI class: Ranger (bow), walk cycle (moving to a target)",
+      "source": "craftpix-bow-heroes",
+      "animation": {
+        "frameRate": 10,
+        "repeat": -1
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any of the 3 bow heroes: Walk frames (if the pack has no walk animation, pack a few frames of a similar one)"
+    },
+    {
+      "key": "unit.ranger.attack",
+      "type": "spritesheet",
+      "path": "units/ranger/attack.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "unit-card AWI class: Ranger (bow), attack (plays once per hit; the hit lands on frame 3)",
+      "source": "craftpix-bow-heroes",
+      "animation": {
+        "frameRate": 14,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any of the 3 bow heroes: Attack frames (if the pack has no attack animation, pack a few frames of a similar one)"
+    },
+    {
+      "key": "unit.ranger.hurt",
+      "type": "spritesheet",
+      "path": "units/ranger/hurt.png",
+      "width": 256,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 2,
+      "displayScale": 1,
+      "usedFor": "unit-card AWI class: Ranger (bow), hurt flinch (plays once when hit hard)",
+      "source": "craftpix-bow-heroes",
+      "animation": {
+        "frameRate": 10,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any of the 3 bow heroes: Hurt frames (if the pack has no hurt animation, pack a few frames of a similar one)"
+    },
+    {
+      "key": "unit.ranger.dead",
+      "type": "spritesheet",
+      "path": "units/ranger/dead.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "unit-card AWI class: Ranger (bow), death (plays once, holds the last frame)",
+      "source": "craftpix-bow-heroes",
+      "animation": {
+        "frameRate": 10,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any of the 3 bow heroes: Dead frames (if the pack has no dead animation, pack a few frames of a similar one)"
+    },
+    {
+      "key": "unit.mage.idle",
+      "type": "spritesheet",
+      "path": "units/mage/idle.png",
+      "width": 512,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 4,
+      "displayScale": 1,
+      "usedFor": "unit-card AWI class: Mage (staff, fire), idle loop (standing in the arena, on cards)",
+      "source": "craftpix-wizards",
+      "animation": {
+        "frameRate": 6,
+        "repeat": -1
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "Fire mage: Idle frames (if the pack has no idle animation, pack a few frames of a similar one)"
+    },
+    {
+      "key": "unit.mage.walk",
+      "type": "spritesheet",
+      "path": "units/mage/walk.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "unit-card AWI class: Mage (staff, fire), walk cycle (moving to a target)",
+      "source": "craftpix-wizards",
+      "animation": {
+        "frameRate": 10,
+        "repeat": -1
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "Fire mage: Walk frames (if the pack has no walk animation, pack a few frames of a similar one)"
+    },
+    {
+      "key": "unit.mage.attack",
+      "type": "spritesheet",
+      "path": "units/mage/attack.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "unit-card AWI class: Mage (staff, fire), attack (plays once per hit; the hit lands on frame 3)",
+      "source": "craftpix-wizards",
+      "animation": {
+        "frameRate": 14,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "Fire mage: Attack frames (if the pack has no attack animation, pack a few frames of a similar one)"
+    },
+    {
+      "key": "unit.mage.hurt",
+      "type": "spritesheet",
+      "path": "units/mage/hurt.png",
+      "width": 256,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 2,
+      "displayScale": 1,
+      "usedFor": "unit-card AWI class: Mage (staff, fire), hurt flinch (plays once when hit hard)",
+      "source": "craftpix-wizards",
+      "animation": {
+        "frameRate": 10,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "Fire mage: Hurt frames (if the pack has no hurt animation, pack a few frames of a similar one)"
+    },
+    {
+      "key": "unit.mage.dead",
+      "type": "spritesheet",
+      "path": "units/mage/dead.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "unit-card AWI class: Mage (staff, fire), death (plays once, holds the last frame)",
+      "source": "craftpix-wizards",
+      "animation": {
+        "frameRate": 10,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "Fire mage: Dead frames (if the pack has no dead animation, pack a few frames of a similar one)"
+    },
+    {
+      "key": "unit.healer.idle",
+      "type": "spritesheet",
+      "path": "units/healer/idle.png",
+      "width": 512,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 4,
+      "displayScale": 1,
+      "usedFor": "unit-card AWI class: Healer (staff, heals), idle loop (standing in the arena, on cards)",
+      "source": "craftpix-wizards",
+      "animation": {
+        "frameRate": 6,
+        "repeat": -1
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "Light magician: Idle frames (if the pack has no idle animation, pack a few frames of a similar one)"
+    },
+    {
+      "key": "unit.healer.walk",
+      "type": "spritesheet",
+      "path": "units/healer/walk.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "unit-card AWI class: Healer (staff, heals), walk cycle (moving to a target)",
+      "source": "craftpix-wizards",
+      "animation": {
+        "frameRate": 10,
+        "repeat": -1
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "Light magician: Walk frames (if the pack has no walk animation, pack a few frames of a similar one)"
+    },
+    {
+      "key": "unit.healer.attack",
+      "type": "spritesheet",
+      "path": "units/healer/attack.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "unit-card AWI class: Healer (staff, heals), attack (plays once per hit; the hit lands on frame 3)",
+      "source": "craftpix-wizards",
+      "animation": {
+        "frameRate": 14,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "Light magician: Attack frames (if the pack has no attack animation, pack a few frames of a similar one)"
+    },
+    {
+      "key": "unit.healer.hurt",
+      "type": "spritesheet",
+      "path": "units/healer/hurt.png",
+      "width": 256,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 2,
+      "displayScale": 1,
+      "usedFor": "unit-card AWI class: Healer (staff, heals), hurt flinch (plays once when hit hard)",
+      "source": "craftpix-wizards",
+      "animation": {
+        "frameRate": 10,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "Light magician: Hurt frames (if the pack has no hurt animation, pack a few frames of a similar one)"
+    },
+    {
+      "key": "unit.healer.dead",
+      "type": "spritesheet",
+      "path": "units/healer/dead.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "unit-card AWI class: Healer (staff, heals), death (plays once, holds the last frame)",
+      "source": "craftpix-wizards",
+      "animation": {
+        "frameRate": 10,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "Light magician: Dead frames (if the pack has no dead animation, pack a few frames of a similar one)"
+    },
+    {
+      "key": "unit.rogue.idle",
+      "type": "spritesheet",
+      "path": "units/rogue/idle.png",
+      "width": 512,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 4,
+      "displayScale": 1,
+      "usedFor": "unit-card AWI class: Rogue (twin daggers), idle loop (standing in the arena, on cards)",
+      "source": "craftpix-wizards",
+      "animation": {
+        "frameRate": 6,
+        "repeat": -1
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "Dark magician (until a real rogue pack is found): Idle frames (if the pack has no idle animation, pack a few frames of a similar one)"
+    },
+    {
+      "key": "unit.rogue.walk",
+      "type": "spritesheet",
+      "path": "units/rogue/walk.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "unit-card AWI class: Rogue (twin daggers), walk cycle (moving to a target)",
+      "source": "craftpix-wizards",
+      "animation": {
+        "frameRate": 10,
+        "repeat": -1
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "Dark magician (until a real rogue pack is found): Walk frames (if the pack has no walk animation, pack a few frames of a similar one)"
+    },
+    {
+      "key": "unit.rogue.attack",
+      "type": "spritesheet",
+      "path": "units/rogue/attack.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "unit-card AWI class: Rogue (twin daggers), attack (plays once per hit; the hit lands on frame 3)",
+      "source": "craftpix-wizards",
+      "animation": {
+        "frameRate": 14,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "Dark magician (until a real rogue pack is found): Attack frames (if the pack has no attack animation, pack a few frames of a similar one)"
+    },
+    {
+      "key": "unit.rogue.hurt",
+      "type": "spritesheet",
+      "path": "units/rogue/hurt.png",
+      "width": 256,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 2,
+      "displayScale": 1,
+      "usedFor": "unit-card AWI class: Rogue (twin daggers), hurt flinch (plays once when hit hard)",
+      "source": "craftpix-wizards",
+      "animation": {
+        "frameRate": 10,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "Dark magician (until a real rogue pack is found): Hurt frames (if the pack has no hurt animation, pack a few frames of a similar one)"
+    },
+    {
+      "key": "unit.rogue.dead",
+      "type": "spritesheet",
+      "path": "units/rogue/dead.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "unit-card AWI class: Rogue (twin daggers), death (plays once, holds the last frame)",
+      "source": "craftpix-wizards",
+      "animation": {
+        "frameRate": 10,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "Dark magician (until a real rogue pack is found): Dead frames (if the pack has no dead animation, pack a few frames of a similar one)"
+    },
+    {
+      "key": "unit.slime.idle",
+      "type": "spritesheet",
+      "path": "units/slime/idle.png",
+      "width": 512,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 4,
+      "displayScale": 1,
+      "usedFor": "monster: Slime, idle loop (standing in the arena, on cards)",
+      "source": "craftpix-monsters",
+      "animation": {
+        "frameRate": 6,
+        "repeat": -1
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any one monster from the pack: Idle frames"
+    },
+    {
+      "key": "unit.slime.walk",
+      "type": "spritesheet",
+      "path": "units/slime/walk.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "monster: Slime, walk cycle (moving to a target)",
+      "source": "craftpix-monsters",
+      "animation": {
+        "frameRate": 10,
+        "repeat": -1
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any one monster from the pack: Walk frames"
+    },
+    {
+      "key": "unit.slime.attack",
+      "type": "spritesheet",
+      "path": "units/slime/attack.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "monster: Slime, attack (plays once per hit; the hit lands on frame 3)",
+      "source": "craftpix-monsters",
+      "animation": {
+        "frameRate": 14,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any one monster from the pack: Attack frames"
+    },
+    {
+      "key": "unit.slime.hurt",
+      "type": "spritesheet",
+      "path": "units/slime/hurt.png",
+      "width": 256,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 2,
+      "displayScale": 1,
+      "usedFor": "monster: Slime, hurt flinch (plays once when hit hard)",
+      "source": "craftpix-monsters",
+      "animation": {
+        "frameRate": 10,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any one monster from the pack: Hurt frames"
+    },
+    {
+      "key": "unit.slime.dead",
+      "type": "spritesheet",
+      "path": "units/slime/dead.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "monster: Slime, death (plays once, holds the last frame)",
+      "source": "craftpix-monsters",
+      "animation": {
+        "frameRate": 10,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any one monster from the pack: Dead frames"
+    },
+    {
+      "key": "unit.bat.idle",
+      "type": "spritesheet",
+      "path": "units/bat/idle.png",
+      "width": 512,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 4,
+      "displayScale": 1,
+      "usedFor": "monster: Bat, idle loop (standing in the arena, on cards)",
+      "source": "craftpix-monsters",
+      "animation": {
+        "frameRate": 6,
+        "repeat": -1
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any one monster from the pack: Idle frames"
+    },
+    {
+      "key": "unit.bat.walk",
+      "type": "spritesheet",
+      "path": "units/bat/walk.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "monster: Bat, walk cycle (moving to a target)",
+      "source": "craftpix-monsters",
+      "animation": {
+        "frameRate": 10,
+        "repeat": -1
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any one monster from the pack: Walk frames"
+    },
+    {
+      "key": "unit.bat.attack",
+      "type": "spritesheet",
+      "path": "units/bat/attack.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "monster: Bat, attack (plays once per hit; the hit lands on frame 3)",
+      "source": "craftpix-monsters",
+      "animation": {
+        "frameRate": 14,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any one monster from the pack: Attack frames"
+    },
+    {
+      "key": "unit.bat.hurt",
+      "type": "spritesheet",
+      "path": "units/bat/hurt.png",
+      "width": 256,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 2,
+      "displayScale": 1,
+      "usedFor": "monster: Bat, hurt flinch (plays once when hit hard)",
+      "source": "craftpix-monsters",
+      "animation": {
+        "frameRate": 10,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any one monster from the pack: Hurt frames"
+    },
+    {
+      "key": "unit.bat.dead",
+      "type": "spritesheet",
+      "path": "units/bat/dead.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "monster: Bat, death (plays once, holds the last frame)",
+      "source": "craftpix-monsters",
+      "animation": {
+        "frameRate": 10,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any one monster from the pack: Dead frames"
+    },
+    {
+      "key": "unit.goblin.idle",
+      "type": "spritesheet",
+      "path": "units/goblin/idle.png",
+      "width": 512,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 4,
+      "displayScale": 1,
+      "usedFor": "monster: Goblin, idle loop (standing in the arena, on cards)",
+      "source": "craftpix-monsters",
+      "animation": {
+        "frameRate": 6,
+        "repeat": -1
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any one monster from the pack: Idle frames"
+    },
+    {
+      "key": "unit.goblin.walk",
+      "type": "spritesheet",
+      "path": "units/goblin/walk.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "monster: Goblin, walk cycle (moving to a target)",
+      "source": "craftpix-monsters",
+      "animation": {
+        "frameRate": 10,
+        "repeat": -1
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any one monster from the pack: Walk frames"
+    },
+    {
+      "key": "unit.goblin.attack",
+      "type": "spritesheet",
+      "path": "units/goblin/attack.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "monster: Goblin, attack (plays once per hit; the hit lands on frame 3)",
+      "source": "craftpix-monsters",
+      "animation": {
+        "frameRate": 14,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any one monster from the pack: Attack frames"
+    },
+    {
+      "key": "unit.goblin.hurt",
+      "type": "spritesheet",
+      "path": "units/goblin/hurt.png",
+      "width": 256,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 2,
+      "displayScale": 1,
+      "usedFor": "monster: Goblin, hurt flinch (plays once when hit hard)",
+      "source": "craftpix-monsters",
+      "animation": {
+        "frameRate": 10,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any one monster from the pack: Hurt frames"
+    },
+    {
+      "key": "unit.goblin.dead",
+      "type": "spritesheet",
+      "path": "units/goblin/dead.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "monster: Goblin, death (plays once, holds the last frame)",
+      "source": "craftpix-monsters",
+      "animation": {
+        "frameRate": 10,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any one monster from the pack: Dead frames"
+    },
+    {
+      "key": "unit.skeleton.idle",
+      "type": "spritesheet",
+      "path": "units/skeleton/idle.png",
+      "width": 512,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 4,
+      "displayScale": 1,
+      "usedFor": "monster: Skeleton archer, idle loop (standing in the arena, on cards)",
+      "source": "craftpix-monsters",
+      "animation": {
+        "frameRate": 6,
+        "repeat": -1
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any one monster from the pack: Idle frames"
+    },
+    {
+      "key": "unit.skeleton.walk",
+      "type": "spritesheet",
+      "path": "units/skeleton/walk.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "monster: Skeleton archer, walk cycle (moving to a target)",
+      "source": "craftpix-monsters",
+      "animation": {
+        "frameRate": 10,
+        "repeat": -1
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any one monster from the pack: Walk frames"
+    },
+    {
+      "key": "unit.skeleton.attack",
+      "type": "spritesheet",
+      "path": "units/skeleton/attack.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "monster: Skeleton archer, attack (plays once per hit; the hit lands on frame 3)",
+      "source": "craftpix-monsters",
+      "animation": {
+        "frameRate": 14,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any one monster from the pack: Attack frames"
+    },
+    {
+      "key": "unit.skeleton.hurt",
+      "type": "spritesheet",
+      "path": "units/skeleton/hurt.png",
+      "width": 256,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 2,
+      "displayScale": 1,
+      "usedFor": "monster: Skeleton archer, hurt flinch (plays once when hit hard)",
+      "source": "craftpix-monsters",
+      "animation": {
+        "frameRate": 10,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any one monster from the pack: Hurt frames"
+    },
+    {
+      "key": "unit.skeleton.dead",
+      "type": "spritesheet",
+      "path": "units/skeleton/dead.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "monster: Skeleton archer, death (plays once, holds the last frame)",
+      "source": "craftpix-monsters",
+      "animation": {
+        "frameRate": 10,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any one monster from the pack: Dead frames"
+    },
+    {
+      "key": "unit.orc.idle",
+      "type": "spritesheet",
+      "path": "units/orc/idle.png",
+      "width": 512,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 4,
+      "displayScale": 1,
+      "usedFor": "monster: Orc brute, idle loop (standing in the arena, on cards)",
+      "source": "craftpix-monsters",
+      "animation": {
+        "frameRate": 6,
+        "repeat": -1
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any one monster from the pack: Idle frames"
+    },
+    {
+      "key": "unit.orc.walk",
+      "type": "spritesheet",
+      "path": "units/orc/walk.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "monster: Orc brute, walk cycle (moving to a target)",
+      "source": "craftpix-monsters",
+      "animation": {
+        "frameRate": 10,
+        "repeat": -1
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any one monster from the pack: Walk frames"
+    },
+    {
+      "key": "unit.orc.attack",
+      "type": "spritesheet",
+      "path": "units/orc/attack.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "monster: Orc brute, attack (plays once per hit; the hit lands on frame 3)",
+      "source": "craftpix-monsters",
+      "animation": {
+        "frameRate": 14,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any one monster from the pack: Attack frames"
+    },
+    {
+      "key": "unit.orc.hurt",
+      "type": "spritesheet",
+      "path": "units/orc/hurt.png",
+      "width": 256,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 2,
+      "displayScale": 1,
+      "usedFor": "monster: Orc brute, hurt flinch (plays once when hit hard)",
+      "source": "craftpix-monsters",
+      "animation": {
+        "frameRate": 10,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any one monster from the pack: Hurt frames"
+    },
+    {
+      "key": "unit.orc.dead",
+      "type": "spritesheet",
+      "path": "units/orc/dead.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "monster: Orc brute, death (plays once, holds the last frame)",
+      "source": "craftpix-monsters",
+      "animation": {
+        "frameRate": 10,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any one monster from the pack: Dead frames"
+    },
+    {
+      "key": "unit.golem.idle",
+      "type": "spritesheet",
+      "path": "units/golem/idle.png",
+      "width": 512,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 4,
+      "displayScale": 1,
+      "usedFor": "monster: Stone golem (also the stage-10 boss, drawn bigger), idle loop (standing in the arena, on cards)",
+      "source": "craftpix-monsters",
+      "animation": {
+        "frameRate": 6,
+        "repeat": -1
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any one monster from the pack: Idle frames"
+    },
+    {
+      "key": "unit.golem.walk",
+      "type": "spritesheet",
+      "path": "units/golem/walk.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "monster: Stone golem (also the stage-10 boss, drawn bigger), walk cycle (moving to a target)",
+      "source": "craftpix-monsters",
+      "animation": {
+        "frameRate": 10,
+        "repeat": -1
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any one monster from the pack: Walk frames"
+    },
+    {
+      "key": "unit.golem.attack",
+      "type": "spritesheet",
+      "path": "units/golem/attack.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "monster: Stone golem (also the stage-10 boss, drawn bigger), attack (plays once per hit; the hit lands on frame 3)",
+      "source": "craftpix-monsters",
+      "animation": {
+        "frameRate": 14,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any one monster from the pack: Attack frames"
+    },
+    {
+      "key": "unit.golem.hurt",
+      "type": "spritesheet",
+      "path": "units/golem/hurt.png",
+      "width": 256,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 2,
+      "displayScale": 1,
+      "usedFor": "monster: Stone golem (also the stage-10 boss, drawn bigger), hurt flinch (plays once when hit hard)",
+      "source": "craftpix-monsters",
+      "animation": {
+        "frameRate": 10,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any one monster from the pack: Hurt frames"
+    },
+    {
+      "key": "unit.golem.dead",
+      "type": "spritesheet",
+      "path": "units/golem/dead.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "monster: Stone golem (also the stage-10 boss, drawn bigger), death (plays once, holds the last frame)",
+      "source": "craftpix-monsters",
+      "animation": {
+        "frameRate": 10,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame, about 80–100 px tall.",
+      "pixelArt": true,
+      "sourceFiles": "any one monster from the pack: Dead frames"
+    },
+    {
+      "key": "card.common",
+      "type": "image",
+      "path": "cards/common.png",
+      "width": 192,
+      "height": 288,
+      "frameWidth": 192,
+      "frameHeight": 288,
+      "frameCount": 1,
+      "displayScale": 1,
+      "usedFor": "unit card frame, Common rarity (grey/stone). The unit stands in the window at the top half; name, stats and ability are printed over the lower half.",
+      "source": "batareya-frames",
+      "pixelArt": true,
+      "notes": "Batareya frames are 64×96: pack them 3× to 192×288."
+    },
+    {
+      "key": "card.rare",
+      "type": "image",
+      "path": "cards/rare.png",
+      "width": 192,
+      "height": 288,
+      "frameWidth": 192,
+      "frameHeight": 288,
+      "frameCount": 1,
+      "displayScale": 1,
+      "usedFor": "unit card frame, Rare rarity (blue). The unit stands in the window at the top half; name, stats and ability are printed over the lower half.",
+      "source": "batareya-frames",
+      "pixelArt": true,
+      "notes": "Batareya frames are 64×96: pack them 3× to 192×288."
+    },
+    {
+      "key": "card.epic",
+      "type": "image",
+      "path": "cards/epic.png",
+      "width": 192,
+      "height": 288,
+      "frameWidth": 192,
+      "frameHeight": 288,
+      "frameCount": 1,
+      "displayScale": 1,
+      "usedFor": "unit card frame, Epic rarity (purple). The unit stands in the window at the top half; name, stats and ability are printed over the lower half.",
+      "source": "batareya-frames",
+      "pixelArt": true,
+      "notes": "Batareya frames are 64×96: pack them 3× to 192×288."
+    },
+    {
+      "key": "card.legendary",
+      "type": "image",
+      "path": "cards/legendary.png",
+      "width": 192,
+      "height": 288,
+      "frameWidth": 192,
+      "frameHeight": 288,
+      "frameCount": 1,
+      "displayScale": 1,
+      "usedFor": "unit card frame, Legendary rarity (gold). The unit stands in the window at the top half; name, stats and ability are printed over the lower half.",
+      "source": "batareya-frames",
+      "pixelArt": true,
+      "notes": "Batareya frames are 64×96: pack them 3× to 192×288."
+    },
+    {
+      "key": "ui.icon.warrior",
+      "type": "image",
+      "path": "ui/icon-warrior.png",
+      "width": 48,
+      "height": 48,
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "frameCount": 1,
+      "displayScale": 1,
+      "usedFor": "class icon: warrior (cards, team builder)",
+      "source": "own"
+    },
+    {
+      "key": "ui.icon.ranger",
+      "type": "image",
+      "path": "ui/icon-ranger.png",
+      "width": 48,
+      "height": 48,
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "frameCount": 1,
+      "displayScale": 1,
+      "usedFor": "class icon: ranger (cards, team builder)",
+      "source": "own"
+    },
+    {
+      "key": "ui.icon.mage",
+      "type": "image",
+      "path": "ui/icon-mage.png",
+      "width": 48,
+      "height": 48,
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "frameCount": 1,
+      "displayScale": 1,
+      "usedFor": "class icon: mage (cards, team builder)",
+      "source": "own"
+    },
+    {
+      "key": "ui.icon.healer",
+      "type": "image",
+      "path": "ui/icon-healer.png",
+      "width": 48,
+      "height": 48,
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "frameCount": 1,
+      "displayScale": 1,
+      "usedFor": "class icon: healer (cards, team builder)",
+      "source": "own"
+    },
+    {
+      "key": "ui.icon.rogue",
+      "type": "image",
+      "path": "ui/icon-rogue.png",
+      "width": 48,
+      "height": 48,
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "frameCount": 1,
+      "displayScale": 1,
+      "usedFor": "class icon: rogue (cards, team builder)",
+      "source": "own"
+    },
+    {
+      "key": "ui.slot",
+      "type": "image",
+      "path": "ui/slot.png",
+      "width": 192,
+      "height": 288,
+      "frameWidth": 192,
+      "frameHeight": 288,
+      "frameCount": 1,
+      "displayScale": 1,
+      "usedFor": "empty team slot in the team builder (dashed outline)",
+      "source": "own"
+    },
+    {
+      "key": "fx.slash",
+      "type": "spritesheet",
+      "path": "fx/slash.png",
+      "width": 384,
+      "height": 96,
+      "frameWidth": 96,
+      "frameHeight": 96,
+      "frameCount": 4,
+      "displayScale": 1,
+      "usedFor": "effect: melee hit arc (plays once on the target)",
+      "source": "fga-magic-fx",
+      "animation": {
+        "frameRate": 20,
+        "repeat": 0
+      },
+      "sourceFiles": "a short spark or slash effect"
+    },
+    {
+      "key": "fx.explosion",
+      "type": "spritesheet",
+      "path": "fx/explosion.png",
+      "width": 768,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "effect: Mage fireball explosion / Golem slam (plays once)",
+      "source": "fga-magic-fx",
+      "animation": {
+        "frameRate": 18,
+        "repeat": 0
+      },
+      "sourceFiles": "a fire burst effect"
+    },
+    {
+      "key": "fx.heal",
+      "type": "spritesheet",
+      "path": "fx/heal.png",
+      "width": 576,
+      "height": 96,
+      "frameWidth": 96,
+      "frameHeight": 96,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "effect: heal sparkle on the healed unit (plays once)",
+      "source": "fga-magic-fx",
+      "animation": {
+        "frameRate": 14,
+        "repeat": 0
+      },
+      "sourceFiles": "the healing effect"
+    },
+    {
+      "key": "fx.stun",
+      "type": "spritesheet",
+      "path": "fx/stun.png",
+      "width": 192,
+      "height": 48,
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "frameCount": 4,
+      "displayScale": 1,
+      "usedFor": "effect: stars circling a stunned unit's head (loops)",
+      "source": "fga-magic-fx",
+      "animation": {
+        "frameRate": 10,
+        "repeat": -1
+      },
+      "sourceFiles": "the charm or petrification effect"
+    },
+    {
+      "key": "fx.arrow",
+      "type": "image",
+      "path": "fx/arrow.png",
+      "width": 48,
+      "height": 16,
+      "frameWidth": 48,
+      "frameHeight": 16,
+      "frameCount": 1,
+      "displayScale": 1,
+      "usedFor": "projectile: Ranger / Skeleton arrow, pointing right",
+      "source": "own"
+    },
+    {
+      "key": "fx.orb",
+      "type": "image",
+      "path": "fx/orb.png",
+      "width": 32,
+      "height": 32,
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frameCount": 1,
+      "displayScale": 1,
+      "usedFor": "projectile: magic bolt (Mage, Healer). White core; tinted in game.",
+      "source": "own"
+    },
+    {
+      "key": "fx.dot",
+      "type": "image",
+      "path": "fx/dot.png",
+      "width": 16,
+      "height": 16,
+      "frameWidth": 16,
+      "frameHeight": 16,
+      "frameCount": 1,
+      "displayScale": 1,
+      "usedFor": "effect: round particle (sparks, heals). White; tinted in game.",
+      "source": "own"
+    },
+    {
+      "key": "fx.px",
+      "type": "image",
+      "path": "fx/px.png",
+      "width": 8,
+      "height": 8,
+      "frameWidth": 8,
+      "frameHeight": 8,
+      "frameCount": 1,
+      "displayScale": 1,
+      "usedFor": "effect: square particle (debris). White; tinted in game.",
+      "source": "own"
+    },
+    {
+      "key": "fx.ring",
+      "type": "image",
+      "path": "fx/ring.png",
+      "width": 128,
+      "height": 128,
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frameCount": 1,
+      "displayScale": 1,
+      "usedFor": "effect: shockwave ring (abilities, collection bonus). White; tinted in game.",
+      "source": "own"
+    },
+    {
+      "key": "bg.arena",
+      "type": "image",
+      "path": "backgrounds/arena.png",
+      "width": 720,
+      "height": 1280,
+      "frameWidth": 720,
+      "frameHeight": 1280,
+      "frameCount": 1,
+      "displayScale": 1,
+      "usedFor": "arena floor behind the battle (portrait, fills the screen)",
+      "source": "own"
+    }
+  ]
+}
