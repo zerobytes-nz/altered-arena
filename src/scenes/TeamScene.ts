@@ -8,6 +8,7 @@ import { sfx } from '../systems/audio.ts';
 
 const SLOT_X = [130, 360, 590];
 const SLOT_Y = 470;
+const BENCH_TOP = 740, BENCH_BOTTOM = 1154; // the Fight button sits below
 
 /** Pick 3 units: tap a card below to add it, tap a team card to take it out. Shows the stage's enemies. */
 export class TeamScene extends Phaser.Scene {
@@ -57,21 +58,47 @@ export class TeamScene extends Phaser.Scene {
     this.input.keyboard?.once('keydown-SPACE', () => this.go());
   }
 
+  /** Your unit cards (NFT units first), in a list that scrolls by drag or mouse wheel when it is taller than the space. */
   private bench(): void {
     const units = roster();
-    text(this, 34, 712, 'YOUR UNITS', 18, '#d9d0ff', '800');
-    const perRow = units.length > 6 ? 5 : 3, scale = perRow === 5 ? 0.6 : 0.68; // milestone 2: scroll when there are more
+    const nNft = units.filter((u) => u.source === 'nft').length;
+    text(this, 34, 712, nNft ? `YOUR UNITS · ${nNft} from your NFTs` : 'YOUR UNITS', 18, '#d9d0ff', '800');
+    const perRow = units.length > 6 ? 5 : 3, scale = perRow === 5 ? 0.6 : 0.68;
     const cw = 192 * scale + 14, ch = 288 * scale + 12;
+    const box = this.add.container(0, 0);
     units.forEach((u, i) => {
       const row = Math.floor(i / perRow), col = i % perRow;
       const inRow = Math.min(perRow, units.length - row * perRow);
       const x = GAME_W / 2 + (col - (inRow - 1) / 2) * cw;
-      const y = 740 + ch / 2 + row * ch;
+      const y = BENCH_TOP + ch / 2 + row * ch;
       const card = unitCard(this, x, y, u, scale);
       const tick = text(this, x, y, '✓', 72, '#ffffff', '900').setOrigin(0.5).setStroke('#000000', 8).setVisible(false);
-      card.setInteractive({ useHandCursor: true }).on('pointerup', () => this.toggle(u));
+      card.setInteractive({ useHandCursor: true }).on('pointerup', (p: Phaser.Input.Pointer) => {
+        // a tap, not the end of a scroll, and inside the visible part of the list
+        if (Math.abs(p.upY - p.downY) < 14 && p.y >= BENCH_TOP && p.y <= BENCH_BOTTOM) this.toggle(u);
+      });
+      box.add([card, tick]);
       this.benchCards.set(u.uid, { card, tick });
     });
+
+    const contentH = Math.ceil(units.length / perRow) * ch + 6;
+    const maxScroll = Math.max(0, contentH - (BENCH_BOTTOM - BENCH_TOP));
+    if (!maxScroll) return;
+    const shape = this.make.graphics({}, false).fillRect(0, BENCH_TOP - 4, GAME_W, BENCH_BOTTOM - BENCH_TOP + 4);
+    box.setMask(shape.createGeometryMask());
+    const hint = text(this, GAME_W - 34, 712, '▼ drag for more', 18, '#9fe8ff', '700').setOrigin(1, 0);
+    let scroll = 0, from = 0;
+    const setScroll = (v: number) => {
+      scroll = Phaser.Math.Clamp(v, 0, maxScroll);
+      box.y = -scroll;
+      hint.setText(scroll >= maxScroll - 1 ? '▲ drag back up' : '▼ drag for more');
+    };
+    const inBench = (p: Phaser.Input.Pointer) => p.downY >= BENCH_TOP && p.downY <= BENCH_BOTTOM;
+    this.input.on('pointerdown', () => { from = scroll; });
+    this.input.on('pointermove', (p: Phaser.Input.Pointer) => {
+      if (p.isDown && inBench(p) && Math.abs(p.y - p.downY) > 12) setScroll(from - (p.y - p.downY));
+    });
+    this.input.on('wheel', (_p: unknown, _o: unknown, _dx: number, dy: number) => setScroll(scroll + dy * 0.6));
   }
 
   private toggle(u: UnitDef): void {

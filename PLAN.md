@@ -35,6 +35,10 @@ Stack: **Phaser 3 + TypeScript + Vite**, static build, portrait, mobile-first, t
   | Healer | Support | **Mend**: heals the most hurt ally (Legendary: the whole team) |
   | Rogue | Assassin, crits | **Backstab**: blinks behind the weakest enemy and strikes |
 
+  NFT unit cards come in 10 kinds, two per class, each with its own ability: Knight (Shield Bash) / Berserker (Whirlwind),
+  Archer (Volley) / Sniper (Aimed Shot), Pyromancer (Fireball) / Frost Mage (Frost Nova), Cleric (Mend) / Druid (Regrowth),
+  Assassin (Backstab) / Duelist (Flurry). Guest units use the first ability of their class.
+
   Rarity: Common / Rare / Epic / Legendary. It gives health and attack ×1 / 1.15 / 1.32 / 1.55 and ability power ×1 / 1.1 / 1.22 / 1.4.
 - **Collection bonus.** 2 units from the same NFT collection give the **whole team** +15%, and 3 give +30% with abilities starting half charged.
   Each collection always gives the same buff (Might = attack, Vigor = health, Haste = speed), picked by a hash of the collection id.
@@ -47,7 +51,8 @@ The battle code is plain TypeScript with no Phaser, run by Node directly. Result
 - Guest teams clear stages 1–5. Good guest picks (Warrior + Healer + one more) clear stage 6. Stage 7 needs NFT units.
 - Rare/Epic teams reach stages 8–9. A Rare team with the 3-collection bonus clears stage 9.
 - Only Legendary teams (or very good luck) beat the stage 10 boss.
-- Median battle length: about 23 s.
+- Median battle length: about 25 s.
+- Single Rare NFT units next to a Rare Knight and Cleric: Pyromancer, Frost Mage, Sniper and Duelist teams stall at stage 7 (the Golem); tune in milestone 3.
 
 So a guest demo plays well, and connecting real NFTs is visibly what gets you to the top. That is the TheoSwap pitch.
 
@@ -63,18 +68,23 @@ So a guest demo plays well, and connecting real NFTs is visibly what gets you to
 - Performance in the browser pane at phone size (375×812, WebGL): **61 fps**, JS + render **0.3 ms median / 0.7 ms p95 per frame**
   in a 6-unit stage-7 battle (`?debug` shows the FPS meter). Not yet measured on a real phone.
 
-### 2. TheoSwap integration
-- **TheoSwap setup (theoswap MCP, dry-run first, approved before each real write):** create the hidden game "Altered Arena". Create its
-  config "Altered Arena unit cards" with one leaf per unit card (e.g. `unit_warrior`, `unit_ranger`, … and later variants), each with an item image.
-  Add a **Rarity** attribute (same 21-slot weighting as Altered Run: about 52/29/14/5%). Set it as the game's default and assign the same test collections as Altered Run.
-- **Sign-in:** user code → `GET ./api/user-items?userCode=` (our proxy, see *Secrets*). Deep link `?userCode=CODE`.
-  The `src/theoswap.ts` client (fetch, per-code offline cache) is already here.
-- **Unit cards from items:** itemId → class, Rarity → tier, `contract` → collection (named via the config or `find_collection`).
-  Each NFT gets a deterministic card name from its token id.
-- **Team builder** with a scrolling bench of NFT cards first, then the guest units.
-- **AWI reveal cards:** "Your NFT became a Legendary Rogue" with a fanfare per tier, ×N for duplicates.
-- **Demo profiles** Whale / Collector / New player from `set_test_items` test codes (like Altered Run's AAAAAAAA / BBBBBBBB / CCCCCCCC). Bundled sample data when offline.
-- **Offline cache:** last good answer per code (done in `theoswap.ts`), profile and team in `localStorage`.
+### 2. TheoSwap integration (done)
+- **TheoSwap setup** (theoswap MCP; every write dry-run first and approved): hidden game **Altered Arena (game 8)**; free draft config
+  **"Altered Arena Unit Cards" (config 16)**, the game's default, private. 10 items `unit_knight` … `unit_duelist` grouped by class,
+  each with a **Rarity** attribute (21 slots: 11 Common / 6 Rare / 3 Epic / 1 Legendary, the same as Altered Run).
+  **To do on the TheoSwap Developer page:** publish config 16 (and assign collections) before real players get unit cards; release the game when ready.
+- **Sign-in:** menu → *Connect TheoSwap* → player code, or the deep link `?userCode=CODE` (the code is removed from the URL after use).
+  `src/profile.ts` keeps the connected player (label, source, raw results) in `localStorage`.
+- **Unit cards from items** (`src/awi.ts`): itemId → unit kind and ability, Rarity → tier, contract → collection, token id → name ("Frost Mage #2").
+  TheoSwap's test NFTs all use the zero-address contract, which is treated as *no collection*, so demo teams don't get a free bonus.
+  The collection name comes from the API if it sends one, else "Collection 0x1234…abcd". Not yet seen with real NFTs.
+- **AWI reveal cards** (`RevealScene`): "Your NFT became a Legendary Mage", the card at full size, a fanfare per tier (flash for Legendary), ×N for duplicates.
+  Afterwards the best 3 NFT units are put in the team.
+- **Team builder:** NFT units first, then the guests, in a list that scrolls by drag or mouse wheel.
+- **Demo profiles** (`src/demo.ts`): Whale `AAAAAAAA` (11 NFTs, 2 Legendary, every unit kind), Collector `BBBBBBBB` (4), New player `CCCCCCCC` (1).
+  They ask TheoSwap first and fall back to the bundled copy of the same items.
+- **Offline:** the last good answer per code (`theoswap.ts`), plus the profile and team in `localStorage`.
+- Not checked yet: a live call with the test key (no `.env` here), and real phones.
 
 ### 3. Polish and deploy
 - Real art: the packs below in `public/assets/licensed/` (not in git). Pixel-art filtering is already handled (`pixelArt` in the manifest).
@@ -127,9 +137,12 @@ public/assets/placeholder/  committed original art    public/assets/licensed/  g
 scripts/                  check-assets, assets-status, assets-docs, gen-placeholders, pack-frames, gen-pwa-icons, deploy, sim
 src/
   battle/                 units.ts (classes, rarity, collection bonus), stages.ts (ladder), sim.ts (the battle). No Phaser.
-  scenes/                 Boot, Menu (ladder), Team, Battle, Result
+  scenes/                 Boot, Menu (ladder), Connect, Reveal, Team, Battle, Result
   systems/                audio (Web Audio synth), install (PWA / Android via Chrome)
   state.ts                roster, team and ladder progress (localStorage)
-  theoswap.ts             user-items client via the proxy, offline cache (milestone 2)
+  theoswap.ts             user-items client via the proxy, offline cache
+  profile.ts              the connected player (code or demo), kept in localStorage
+  awi.ts                  user-items results → unit cards
+  demo.ts                 demo players: test codes + bundled sample items
   ui.ts                   buttons, unit card, notices
 ```

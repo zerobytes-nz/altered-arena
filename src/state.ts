@@ -1,6 +1,8 @@
-// What the player has: their units (guest units now; NFT unit cards from milestone 2), the team they
-// picked, and how far up the ladder they are. Kept in localStorage.
+// What the player has: their units (NFT unit cards from the connected TheoSwap profile, then the free guest
+// units), the team they picked, and how far up the ladder they are. Kept in localStorage.
 import { DEFAULT_TEAM, GUEST_UNITS, makeUnit, type UnitDef } from './battle/units.ts';
+import { unitsFromItems } from './awi.ts';
+import { loadProfile } from './profile.ts';
 import { STAGE_COUNT } from './battle/stages.ts';
 import { SAMPLE_NFTS } from './config.ts';
 
@@ -12,7 +14,7 @@ const store = {
   set(k: string, v: unknown): void { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* private mode / full */ } },
 };
 
-// ?nft: sample unit cards shaped like milestone-2 NFT AWIs, from two made-up collections.
+// ?nft: sample NFT-style unit cards from two made-up collections, to try the collection bonus.
 const APES = { id: 'sample:apes', name: 'Sample Apes' };
 const PUNKS = { id: 'sample:punks', name: 'Sample Punks' };
 const SAMPLES: UnitDef[] = [
@@ -22,9 +24,19 @@ const SAMPLES: UnitDef[] = [
   makeUnit('rogue', 'Legendary', { uid: 'nft:4', name: 'Neon Punk', collection: PUNKS, source: 'nft' }),
 ];
 
+/** The unit cards made from the connected player's NFTs, best rarity first. */
+export const nftUnits = (): UnitDef[] => unitsFromItems(loadProfile()?.results ?? []);
+
 /** Every unit card the player can field: their NFT units first, then the free guest units. */
 export function roster(): UnitDef[] {
-  return [...(SAMPLE_NFTS ? SAMPLES : []), ...GUEST_UNITS];
+  return [...nftUnits(), ...(SAMPLE_NFTS ? SAMPLES : []), ...GUEST_UNITS];
+}
+
+/** After connecting: put the best NFT units in the team, filled up with the default guests. */
+export function autoTeam(): void {
+  const ids = nftUnits().slice(0, 3).map((u) => u.uid);
+  for (const id of DEFAULT_TEAM) if (ids.length < 3) ids.push(id);
+  store.set(LS_TEAM, ids);
 }
 
 export function loadTeam(): UnitDef[] {

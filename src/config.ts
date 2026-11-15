@@ -5,7 +5,7 @@ export const GAME_H = 1280;
 const params = new URLSearchParams(location.search);
 /** ?debug: FPS meter and window.__game. */
 export const DEBUG = params.has('debug');
-/** ?nft: add sample NFT-style unit cards (two collections) to test rarity and the collection bonus before milestone 2. */
+/** ?nft: add sample NFT-style unit cards from two collections, to try the collection bonus. */
 export const SAMPLE_NFTS = params.has('nft');
 
 export const COLORS = {

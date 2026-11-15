@@ -9,7 +9,7 @@ The same NFTs are hero skins and weapons in [Altered Run](https://github.com/zer
 
 ```bash
 npm install      # also installs the pre-commit hook
-npm run dev      # http://localhost:5181   (?debug = FPS meter, ?nft = sample NFT unit cards)
+npm run dev      # http://localhost:5181   (?debug = FPS meter, ?nft = sample cards from two collections)
 npm run build    # static site in dist/
 npm run sim      # balance check: every team vs every stage, no browser
 ```
@@ -42,6 +42,11 @@ redistributed** (CraftPix freebies, itch.io packs) is never in this repo. [ASSET
 
 ## TheoSwap and secrets
 
+Players tap **Connect TheoSwap** on the menu and enter the player code from their TheoSwap profile, or open the game
+with `?userCode=CODE` (the link TheoSwap sends them to). Each NFT becomes a unit card, revealed one by one.
+The three demo players (Whale, Collector, New player) use TheoSwap test codes `AAAAAAAA` / `BBBBBBBB` / `CCCCCCCC`
+and fall back to the same items bundled in `src/demo.ts` when there is no key or no signal.
+
 **No API key is ever in the browser or in git.** The game only calls its own server: `./api/user-items?userCode=…`.
 - `npm run dev` / `npm run preview`: `vite.config.ts` forwards that to TheoSwap's `/api/public/user-items` and adds
   `THEOSWAP_API_KEY` from `.env` (copy `.env.example`; use the game's **test** key). The name has no `VITE_` prefix, so Vite never bundles it.
@@ -63,7 +68,9 @@ nginx, in the `games.theoswap.io` site (same pattern as Altered Run; the test co
 # Top of the site file, OUTSIDE server { }:
 map $arg_userCode $altered_arena_key {
     default    "LIVE_API_KEY_HERE";
-    # demo test codes → "TEST_API_KEY_HERE";   (filled in at milestone 2)
+    AAAAAAAA   "TEST_API_KEY_HERE";   # demo players (TheoSwap test items of game 8)
+    BBBBBBBB   "TEST_API_KEY_HERE";
+    CCCCCCCC   "TEST_API_KEY_HERE";
 }
 
 # Inside server { }:

@@ -5,7 +5,7 @@
 // Node runs the game's own TypeScript (src/battle/) directly (type stripping, Node ≥ 22.18).
 import { simulate } from '../src/battle/sim.ts';
 import { stage, STAGE_COUNT } from '../src/battle/stages.ts';
-import { GUEST_UNITS, makeUnit, CLASS_IDS } from '../src/battle/units.ts';
+import { GUEST_UNITS, makeUnit, CLASS_IDS, UNIT_ITEMS } from '../src/battle/units.ts';
 
 const seeds = Number(process.argv[process.argv.indexOf('--seeds') + 1]) || 60;
 const teams = [];
@@ -17,6 +17,12 @@ teams.push({ name: 'EPIC war+mage+heal', units: ['warrior', 'mage', 'healer'].ma
 teams.push({ name: 'RARE x3 collection', units: ['warrior', 'ranger', 'healer'].map((c, i) => makeUnit(c, 'Rare', { uid: `c${i}`, collection: col })) });
 teams.push({ name: 'LEG war+mage+heal', units: ['warrior', 'mage', 'healer'].map((c, i) => makeUnit(c, 'Legendary', { uid: `l${i}` })) });
 
+// Every NFT unit (Rare) with a Rare Knight + Rare Cleric, to compare the 10 abilities.
+for (const [id, u] of Object.entries(UNIT_ITEMS)) {
+  const mk = (it, uid) => makeUnit(UNIT_ITEMS[it].cls, 'Rare', { uid, ability: UNIT_ITEMS[it].ability });
+  const third = it => it;
+  teams.push({ name: `R ${u.name}+kn+cl`, units: [mk('unit_knight', 'a'), mk('unit_cleric', 'b'), mk(third(id), 'c')] });
+}
 const pad = (s, n) => String(s).padEnd(n);
 console.log(`\n${pad('team', 22)}${Array.from({ length: STAGE_COUNT }, (_, i) => pad(`S${i + 1}`, 9)).join('')}   (win% / avg s)`);
 const timeAll = [];

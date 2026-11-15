@@ -56,7 +56,9 @@ export function unitCard(scene: Phaser.Scene, x: number, y: number, u: UnitDef, 
   if (u.cls) items.push(scene.add.image(-68, -116, `ui.icon.${u.cls}`).setScale(0.85));
   const role = u.cls ? CLASSES[u.cls] : MONSTERS[u.art as keyof typeof MONSTERS];
   items.push(text(scene, 82, -130, u.rarity.toUpperCase(), 16, hex(RARITY_COLOR[u.rarity]), '900').setOrigin(1, 0).setStroke('#000000', 5));
-  items.push(text(scene, 0, 27, u.name, u.name.length > 10 ? 22 : 26, '#ffffff', '900').setOrigin(0.5).setStroke('#000000', 5));
+  const name = text(scene, 0, 27, u.name, u.name.length > 10 ? 22 : 26, '#ffffff', '900').setOrigin(0.5).setStroke('#000000', 5);
+  if (name.width > 180) name.setScale(180 / name.width); // "Frost Mage #4821"
+  items.push(name);
   const stats: [string, string, string][] = [['⚔', String(u.atk), '#ffb38a'], ['♥', String(u.hp), '#ff8fa3'], ['⚡', fmtSpd(u.spd), '#ffe58a']];
   stats.forEach(([ic, v, col], i) => {
     items.push(text(scene, (i - 1) * 60, 64, `${ic}${v}`, 21, col, '900').setOrigin(0.5).setStroke('#000000', 4));

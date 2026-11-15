@@ -261,10 +261,15 @@ export class BattleScene extends Phaser.Scene {
         break;
       case 'shot': this.addShot(e.p); this.snd('shot', e.p.kind === 'arrow' ? sfx.throw : sfx.zap); break;
       case 'boom':
-        this.fx('fx.explosion', e.x, e.y - 30, e.r / 60, e.kind === 'slam' ? 0xc8b89a : undefined);
-        this.ring(e.x, e.y, e.kind === 'slam' ? 0xd9c8a0 : 0xff8a3d, e.r);
-        this.cameras.main.shake(160, 0.008);
-        this.snd('boom', e.kind === 'slam' ? sfx.stomp : sfx.crash);
+      {
+        const tint = { fire: 0xff8a3d, slam: 0xd9c8a0, frost: 0x9fe8ff, spin: 0xffffff }[e.kind];
+        if (e.kind !== 'spin') this.fx('fx.explosion', e.x, e.y - 30, e.r / 60, e.kind === 'fire' ? undefined : tint);
+        else this.fx('fx.slash', e.x, e.y - 40, 2.2);
+        this.ring(e.x, e.y, tint, e.r);
+        if (e.kind === 'frost') this.burst(e.x, e.y - 30, 0x9fe8ff, 18);
+        this.cameras.main.shake(160, e.kind === 'spin' ? 0.004 : 0.008);
+        this.snd('boom', e.kind === 'slam' ? sfx.stomp : e.kind === 'frost' ? sfx.shield : e.kind === 'spin' ? sfx.slash : sfx.crash);
+      }
         break;
       case 'buff': this.ring(e.f.x, e.f.y - 40, e.kind === 'atk' ? 0xff6b3d : 0xffe066, 55); this.snd('buff', sfx.buff); break;
       case 'spawn': this.addView(e.f); break;

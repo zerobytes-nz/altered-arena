@@ -2,7 +2,8 @@ import Phaser from 'phaser';
 import { GAME_W, GAME_H, COLORS } from '../config.ts';
 import { button, muteButton, notice, text } from '../ui.ts';
 import { stage, STAGE_COUNT } from '../battle/stages.ts';
-import { isUnlocked, loadLadder, nextStage } from '../state.ts';
+import { isUnlocked, loadLadder, nextStage, nftUnits } from '../state.ts';
+import { loadProfile } from '../profile.ts';
 import { canInstall, install, isInstalled, onInstallChange, openInChromeUrl, tryCloseApp } from '../systems/install.ts';
 import { sfx } from '../systems/audio.ts';
 
@@ -27,10 +28,11 @@ export class MenuScene extends Phaser.Scene {
     });
 
     this.ladder();
-    this.fight = button(this, GAME_W / 2, 1150, '', () => this.play(), 460, 104, COLORS.accent, 36);
+    this.fight = button(this, GAME_W / 2, 1132, '', () => this.play(), 460, 100, COLORS.accent, 36);
     this.select(this.selected);
     muteButton(this, GAME_W - 50, 50);
     this.appButtons();
+    this.profileButton();
     this.input.keyboard?.once('keydown-SPACE', () => this.play());
   }
 
@@ -69,6 +71,15 @@ export class MenuScene extends Phaser.Scene {
       o?.lock?.('portrait').catch(() => {});
     }
     this.scene.start('Team', { stage: this.selected });
+  }
+
+  /** Bottom: connect TheoSwap, or who is connected and how many AWIs they brought. */
+  private profileButton(): void {
+    const p = loadProfile();
+    const n = nftUnits().length;
+    const label = p ? `👤 ${p.label} · ${n} AWI${n === 1 ? '' : 's'}` : '🔗 Connect TheoSwap: use your NFTs';
+    const b = button(this, GAME_W / 2, 1240, label, () => this.scene.start('Connect'), 560, 60, p ? COLORS.panel : COLORS.good, 22);
+    if (b.label.width > 530) b.label.setScale(530 / b.label.width);
   }
 
   /** Top corners: "Install app" (until it is installed) and "Exit" (in full screen or the installed app). */

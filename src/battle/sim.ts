@@ -56,7 +56,7 @@ export type BEvent =
   | { t: 'stun'; f: Fighter; dur: number }
   | { t: 'blink'; f: Fighter; fromX: number; fromY: number }
   | { t: 'shot'; p: Projectile }
-  | { t: 'boom'; x: number; y: number; r: number; kind: 'fire' | 'slam' }
+  | { t: 'boom'; x: number; y: number; r: number; kind: 'fire' | 'slam' | 'frost' | 'spin' }
   | { t: 'buff'; f: Fighter; kind: 'atk' | 'spd' }
   | { t: 'spawn'; f: Fighter }
   | { t: 'die'; f: Fighter }
@@ -239,7 +239,7 @@ export class Battle {
     this.projectiles.length = w;
   }
 
-  private explode(src: Fighter, x: number, y: number, r: number, dmg: number, kind: 'fire' | 'slam', stun = 0): void {
+  private explode(src: Fighter, x: number, y: number, r: number, dmg: number, kind: 'fire' | 'slam' | 'frost' | 'spin', stun = 0): void {
     this.events.push({ t: 'boom', x, y, r, kind });
     for (const o of this.fighters) {
       if (!o.alive || o.side === src.side) continue;
@@ -354,6 +354,31 @@ export class Battle {
         if (!near) return false;
         this.events.push({ t: 'cast', f, ability: ab });
         this.explode(f, f.x, f.y, 130 * f.def.size, f.atk * f.atkMul * 1.4 * p, 'slam', 1.0);
+        break;
+      case 'whirlwind':
+        if (!near) return false;
+        this.events.push({ t: 'cast', f, ability: ab });
+        this.explode(f, f.x, f.y, 125, f.atk * f.atkMul * 1.5 * p, 'spin');
+        break;
+      case 'aimedShot': {
+        const weak = foes.reduce((a, b) => (b.hp < a.hp ? b : a));
+        this.events.push({ t: 'cast', f, ability: ab });
+        this.shoot(f, weak, 'arrow', this.roll(f.atk * f.atkMul * 3.4 * p), 0, true);
+        break;
+      }
+      case 'frostNova':
+        this.events.push({ t: 'cast', f, ability: ab });
+        this.explode(f, t.x, t.y, 115 * (legendary ? 1.2 : 1), f.atk * f.atkMul * 1.7 * p, 'frost', 1.3 * p);
+        break;
+      case 'regrowth':
+        if (!friends.some((o) => o.hp < o.maxHp)) return false;
+        this.events.push({ t: 'cast', f, ability: ab });
+        for (const o of friends) this.heal(o, o.maxHp * (legendary ? 0.2 : 0.15) * p, f);
+        break;
+      case 'flurry':
+        if (!near) return false;
+        this.events.push({ t: 'cast', f, ability: ab });
+        for (let i = 0; i < 4 && t.alive; i++) this.damage(f, t, f.atk * f.atkMul * 1.05 * p, true);
         break;
       case 'split':
         return false; // triggered by damage, not energy

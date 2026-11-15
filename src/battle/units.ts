@@ -11,7 +11,8 @@ export const RARITY_POWER: Record<Rarity, number> = { Common: 1, Rare: 1.1, Epic
 
 export type ClassId = 'warrior' | 'ranger' | 'mage' | 'healer' | 'rogue';
 export type MonsterId = 'slime' | 'bat' | 'goblin' | 'skeleton' | 'orc' | 'golem';
-export type AbilityId = 'shieldBash' | 'volley' | 'fireball' | 'mend' | 'backstab' | 'drain' | 'frenzy' | 'warcry' | 'slam' | 'split';
+export type AbilityId = 'shieldBash' | 'volley' | 'fireball' | 'mend' | 'backstab' | 'drain' | 'frenzy' | 'warcry' | 'slam' | 'split'
+  | 'whirlwind' | 'aimedShot' | 'frostNova' | 'regrowth' | 'flurry';
 
 /** Scales every unit's health: sets how long battles last (about 20–30 s) without changing who wins. */
 export const HP_SCALE = 2;
@@ -49,6 +50,11 @@ export const ABILITIES: Record<AbilityId, { name: string; text: string }> = {
   warcry: { name: 'War Cry', text: 'All allies hit harder for a few seconds.' },
   slam: { name: 'Ground Slam', text: 'Damages and stuns everything around it.' },
   split: { name: 'Split', text: 'Spawns a small slime once.' },
+  whirlwind: { name: 'Whirlwind', text: 'Spins and hits every enemy around it.' },
+  aimedShot: { name: 'Aimed Shot', text: 'One huge shot at the weakest enemy.' },
+  frostNova: { name: 'Frost Nova', text: 'Damages and freezes enemies around the target.' },
+  regrowth: { name: 'Regrowth', text: 'Heals the whole team.' },
+  flurry: { name: 'Flurry', text: 'Four quick hits on the target.' },
 };
 
 export interface Collection { id: string; name: string }
@@ -68,12 +74,12 @@ export interface UnitDef {
   boss?: boolean;
 }
 
-export function makeUnit(cls: ClassId, rarity: Rarity, opts: { uid: string; name?: string; collection?: Collection | null; source?: 'guest' | 'nft' }): UnitDef {
+export function makeUnit(cls: ClassId, rarity: Rarity, opts: { uid: string; name?: string; ability?: AbilityId; collection?: Collection | null; source?: 'guest' | 'nft' }): UnitDef {
   const b = CLASSES[cls], k = RARITY_STAT[rarity];
   return {
     uid: opts.uid, name: opts.name ?? b.name, art: cls, cls, rarity,
     hp: Math.round(b.hp * k * HP_SCALE), atk: Math.round(b.atk * k), spd: b.spd, range: b.range, move: b.move,
-    ability: b.ability, size: b.size ?? 1, collection: opts.collection ?? null, source: opts.source ?? 'guest',
+    ability: opts.ability ?? b.ability, size: b.size ?? 1, collection: opts.collection ?? null, source: opts.source ?? 'guest',
   };
 }
 
@@ -87,6 +93,23 @@ export function makeMonster(id: MonsterId, level: number, uid: string, opts: { b
     ability: b.ability, size: (b.size ?? 1) * (opts.boss ? 1.45 : 1), collection: null, source: 'enemy', boss: opts.boss,
   };
 }
+
+/**
+ * The unit-card AWIs in TheoSwap config "Altered Arena Unit Cards" (game 8): config itemId → class, name, ability.
+ * Two units per class; same stats per class, different ability.
+ */
+export const UNIT_ITEMS: Record<string, { cls: ClassId; name: string; ability: AbilityId }> = {
+  unit_knight: { cls: 'warrior', name: 'Knight', ability: 'shieldBash' },
+  unit_berserker: { cls: 'warrior', name: 'Berserker', ability: 'whirlwind' },
+  unit_archer: { cls: 'ranger', name: 'Archer', ability: 'volley' },
+  unit_sniper: { cls: 'ranger', name: 'Sniper', ability: 'aimedShot' },
+  unit_pyromancer: { cls: 'mage', name: 'Pyromancer', ability: 'fireball' },
+  unit_frostmage: { cls: 'mage', name: 'Frost Mage', ability: 'frostNova' },
+  unit_cleric: { cls: 'healer', name: 'Cleric', ability: 'mend' },
+  unit_druid: { cls: 'healer', name: 'Druid', ability: 'regrowth' },
+  unit_assassin: { cls: 'rogue', name: 'Assassin', ability: 'backstab' },
+  unit_duelist: { cls: 'rogue', name: 'Duelist', ability: 'flurry' },
+};
 
 /** Free units every player has. Guests pick 3 of these. */
 export const GUEST_UNITS: UnitDef[] = CLASS_IDS.map((c) => makeUnit(c, 'Common', { uid: `guest:${c}`, source: 'guest' }));

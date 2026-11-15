@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { GAME_W, GAME_H, COLORS } from '../config.ts';
 import { preloadAll, setupAssets } from '../assets.ts';
+import { normalizeCode } from '../theoswap.ts';
 
 export class BootScene extends Phaser.Scene {
   constructor() { super('Boot'); }
@@ -16,6 +17,13 @@ export class BootScene extends Phaser.Scene {
 
   create(): void {
     setupAssets(this);
-    this.scene.start('Menu');
+    // Deep link from TheoSwap (the game's website is …/?userCode=CODE): connect with that code.
+    const url = new URL(location.href);
+    const code = normalizeCode(url.searchParams.get('userCode') ?? '');
+    if (code) {
+      url.searchParams.delete('userCode');
+      history.replaceState(null, '', url); // a reload shouldn't connect again
+      this.scene.start('Connect', { code });
+    } else this.scene.start('Menu');
   }
 }
