@@ -11,6 +11,11 @@ const pickRarity = (v: unknown): Rarity => ((RARITIES as readonly string[]).incl
 
 const short = (addr: string) => (/^0x[0-9a-f]{40}$/i.test(addr) ? `${addr.slice(0, 6)}…${addr.slice(-4)}` : addr || 'Unknown');
 
+/** Names for collections the API sends without one (lower-case contract → name). */
+const KNOWN: Record<string, string> = {
+  '0x71a302d3f021e35982937bed204e24a4a0c51e52': 'TheoCats', // TheoSwap supporters (config "Theo Swap")
+};
+
 /**
  * The collection an NFT belongs to: its contract. The name comes from the API when it sends one.
  * TheoSwap's test NFTs all share the zero address, which is not a real collection, so they get none
@@ -21,7 +26,7 @@ export function collectionOf(r: ApiItem): Collection | null {
   if (!id || id === TEST_CONTRACT) return null;
   const any = r as Record<string, unknown>;
   const name = [any.collectionName, any.collection_name, any.contractName, any.name].find((v) => typeof v === 'string' && v.trim()) as string | undefined;
-  return { id, name: name?.trim() || `Collection ${short(id)}` };
+  return { id, name: name?.trim() || KNOWN[id] || `Collection ${short(id)}` };
 }
 
 /**
