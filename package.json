@@ -16,7 +16,8 @@
     "pwa:icons": "node scripts/gen-pwa-icons.mjs",
     "deploy": "node scripts/deploy.mjs",
     "deploy:check": "node scripts/deploy.mjs --dry-run",
-    "prepare": "simple-git-hooks"
+    "prepare": "simple-git-hooks",
+    "assets:pack-arena": "node scripts/pack-arena-art.mjs"
   },
   "dependencies": {
     "phaser": "^3.90.0"

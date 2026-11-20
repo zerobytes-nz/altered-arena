@@ -119,7 +119,7 @@ export class BattleScene extends Phaser.Scene {
 
   private addView(f: Fighter): void {
     const key = `unit.${f.def.art}.idle`;
-    const spr = this.add.sprite(f.x, f.y, key).setOrigin(0.5, 0.92).setScale(f.def.size).play({ key, startFrame: f.id % 4 });
+    const spr = this.add.sprite(f.x, f.y, key).setOrigin(0.5, 0.94).setScale(f.def.size).play({ key, startFrame: f.id % 4 });
     spr.setFlipX(f.facing < 0);
     const col = f.side === 0 ? 0x4cd16b : 0xe63946;
     const hpBg = this.add.rectangle(0, 0, BAR_W + 4, 12, 0x000000, 0.7).setOrigin(0, 0.5);
@@ -263,7 +263,7 @@ export class BattleScene extends Phaser.Scene {
       case 'boom':
       {
         const tint = { fire: 0xff8a3d, slam: 0xd9c8a0, frost: 0x9fe8ff, spin: 0xffffff }[e.kind];
-        if (e.kind !== 'spin') this.fx('fx.explosion', e.x, e.y - 30, e.r / 60, e.kind === 'fire' ? undefined : tint);
+        if (e.kind !== 'spin') this.fx('fx.explosion', e.x, e.y - 30, e.r / 60, e.kind === 'fire' ? 0xffb066 : tint); // the art may be white smoke
         else this.fx('fx.slash', e.x, e.y - 40, 2.2);
         this.ring(e.x, e.y, tint, e.r);
         if (e.kind === 'frost') this.burst(e.x, e.y - 30, 0x9fe8ff, 18);

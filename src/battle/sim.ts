@@ -268,7 +268,7 @@ export class Battle {
       return;
     }
     if (amount > t.maxHp * 0.1 && t.swing <= 0 && t.state !== 'attack') this.setState(t, 'hurt');
-    // Slimes split once, the first time they drop under half health.
+    // Lizards call a smaller one once, the first time they drop under half health.
     if (t.def.ability === 'split' && !t.splitDone && t.hp < t.maxHp / 2) { t.splitDone = true; this.split(t); }
   }
 
@@ -281,7 +281,7 @@ export class Battle {
   }
 
   private split(t: Fighter): void {
-    const d: UnitDef = { ...t.def, uid: t.def.uid + ':s', name: 'Slimelet', hp: Math.round(t.def.hp * 0.4), atk: Math.round(t.def.atk * 0.6), size: t.def.size * 0.7, ability: null };
+    const d: UnitDef = { ...t.def, uid: t.def.uid + ':s', name: `Little ${t.def.name}`, hp: Math.round(t.def.hp * 0.4), atk: Math.round(t.def.atk * 0.6), size: t.def.size * 0.7, ability: null };
     const f = this.add(d, t.side, t.slot, 1, { x: Math.min(ARENA.right, Math.max(ARENA.left, t.x + (t.x < 360 ? 40 : -40))), y: t.y - 10 });
     this.events.push({ t: 'cast', f: t, ability: 'split' });
     this.events.push({ t: 'spawn', f });

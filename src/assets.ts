@@ -4,7 +4,7 @@ import urls from 'virtual:asset-urls';
 
 /**
  * All art comes from assets.manifest.json. Game code refers to assets by manifest key only
- * (e.g. `unit.slime.attack`); paths, sizes and frame data live in the manifest.
+ * (e.g. `unit.lizard.attack`); paths, sizes and frame data live in the manifest.
  */
 export interface AssetDef {
   key: string;

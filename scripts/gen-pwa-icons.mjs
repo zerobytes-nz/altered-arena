@@ -39,7 +39,7 @@ async function scene(pad) {
   c.drawImage(img, 0, 380, 720, 720, 0, 0, S, S); // the middle of the arena floor
   c.fillStyle = 'rgba(18,13,31,0.25)'; c.fillRect(0, 0, S, S);
   const k = 1 - pad;
-  await draw(c, 'unit.slime.idle', 0, 256 + 120 * k, 256 + 150 * k, 190 * k, 190 * k);
+  await draw(c, 'unit.lizard.idle', 0, 256 + 120 * k, 256 + 150 * k, 190 * k, 190 * k);
   await draw(c, 'unit.warrior.attack', 2, 256 - 70 * k, 256 + 170 * k, 330 * k, 330 * k);
   return cv;
 }

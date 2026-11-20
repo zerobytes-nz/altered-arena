@@ -26,6 +26,7 @@ redistributed** (CraftPix freebies, itch.io packs) is never in this repo. [ASSET
 | Command | What it does |
 |---|---|
 | `npm run assets:status` | Which assets are licensed ● / cc0 ◆ / placeholder ○ / missing ✖ |
+| `npm run assets:pack-arena` | Pack all the downloaded packs in `art-src/` into `public/assets/licensed/` (see PLAN.md → Art) |
 | `npm run assets:pack -- <key> <files…>` | Turn downloaded frames into the exact sheet the game expects (pixel art stays sharp) |
 | `npm run check-assets` | Fails if licensed art, non-CC0 art in `cc0/`, unlisted media or secrets are in git (runs on pre-commit and CI) |
 | `npm run assets:docs` | Regenerate ASSETS.md from `assets.manifest.json` |

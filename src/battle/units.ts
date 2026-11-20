@@ -10,7 +10,7 @@ export const RARITY_STAT: Record<Rarity, number> = { Common: 1, Rare: 1.15, Epic
 export const RARITY_POWER: Record<Rarity, number> = { Common: 1, Rare: 1.1, Epic: 1.22, Legendary: 1.4 };
 
 export type ClassId = 'warrior' | 'ranger' | 'mage' | 'healer' | 'rogue';
-export type MonsterId = 'slime' | 'bat' | 'goblin' | 'skeleton' | 'orc' | 'golem';
+export type MonsterId = 'lizard' | 'drake' | 'imp' | 'medusa' | 'jinn' | 'dragon';
 export type AbilityId = 'shieldBash' | 'volley' | 'fireball' | 'mend' | 'backstab' | 'drain' | 'frenzy' | 'warcry' | 'slam' | 'split'
   | 'whirlwind' | 'aimedShot' | 'frostNova' | 'regrowth' | 'flurry';
 
@@ -31,12 +31,12 @@ export const CLASSES: Record<ClassId, Base> = {
 };
 
 export const MONSTERS: Record<MonsterId, Base> = {
-  slime: { name: 'Slime', role: 'Brawler', hp: 300, atk: 18, spd: 0.8, range: 65, move: 70, ability: 'split' },
-  bat: { name: 'Bat', role: 'Diver', hp: 200, atk: 18, spd: 1.4, range: 60, move: 150, ability: 'drain' },
-  goblin: { name: 'Goblin', role: 'Brawler', hp: 300, atk: 24, spd: 1.1, range: 65, move: 110, ability: 'frenzy' },
-  skeleton: { name: 'Skeleton', role: 'Archer', hp: 260, atk: 24, spd: 1.0, range: 320, move: 80, ability: 'volley' },
-  orc: { name: 'Orc', role: 'Bruiser', hp: 560, atk: 34, spd: 0.8, range: 72, move: 85, ability: 'warcry', size: 1.1 },
-  golem: { name: 'Golem', role: 'Tank', hp: 820, atk: 32, spd: 0.6, range: 80, move: 60, ability: 'slam', size: 1.15 },
+  lizard: { name: 'Lizard', role: 'Brawler', hp: 300, atk: 18, spd: 0.8, range: 65, move: 70, ability: 'split' },
+  drake: { name: 'Drake', role: 'Diver', hp: 200, atk: 18, spd: 1.4, range: 60, move: 150, ability: 'drain' },
+  imp: { name: 'Imp', role: 'Brawler', hp: 300, atk: 24, spd: 1.1, range: 65, move: 110, ability: 'frenzy' },
+  medusa: { name: 'Medusa', role: 'Ranged', hp: 260, atk: 24, spd: 1.0, range: 320, move: 80, ability: 'volley' },
+  jinn: { name: 'Jinn', role: 'Caster', hp: 560, atk: 34, spd: 0.8, range: 72, move: 85, ability: 'warcry', size: 1.1 },
+  dragon: { name: 'Dragon', role: 'Tank', hp: 820, atk: 32, spd: 0.6, range: 80, move: 60, ability: 'slam', size: 1.15 },
 };
 
 export const ABILITIES: Record<AbilityId, { name: string; text: string }> = {
@@ -45,11 +45,11 @@ export const ABILITIES: Record<AbilityId, { name: string; text: string }> = {
   fireball: { name: 'Fireball', text: 'Explodes on the target, burning everyone near it.' },
   mend: { name: 'Mend', text: 'Heals the most hurt ally. Legendary heals the whole team.' },
   backstab: { name: 'Backstab', text: 'Blinks behind the weakest enemy and strikes.' },
-  drain: { name: 'Drain', text: 'Bites and heals itself.' },
+  drain: { name: 'Fire Bite', text: 'Bites and heals itself.' },
   frenzy: { name: 'Frenzy', text: 'Attacks much faster for a few seconds.' },
-  warcry: { name: 'War Cry', text: 'All allies hit harder for a few seconds.' },
-  slam: { name: 'Ground Slam', text: 'Damages and stuns everything around it.' },
-  split: { name: 'Split', text: 'Spawns a small slime once.' },
+  warcry: { name: 'Dark Blessing', text: 'All allies hit harder for a few seconds.' },
+  slam: { name: 'Tail Sweep', text: 'Damages and stuns everything around it.' },
+  split: { name: 'Call Kin', text: 'Calls a small lizard once, when badly hurt.' },
   whirlwind: { name: 'Whirlwind', text: 'Spins and hits every enemy around it.' },
   aimedShot: { name: 'Aimed Shot', text: 'One huge shot at the weakest enemy.' },
   frostNova: { name: 'Frost Nova', text: 'Damages and freezes enemies around the target.' },

@@ -19,18 +19,19 @@ function shadow(c, w, ground, rx = 26) { c.fillStyle = 'rgba(0,0,0,0.28)'; ellip
 
 // ───────────────────────────── Units ─────────────────────────────
 
+// Placeholder looks for the monsters are stand-ins (slime body for the lizard, bat for the drake, golem for the dragon).
 const UNITS = {
   warrior: { kind: 'humanoid', body: '#5b7bb5', head: '#f0c9a0', limb: '#3d4f7a', accent: '#e0b030', eye: '#1b2233', weapon: 'sword', shield: '#8a9bb5', helm: '#aab6cc' },
   ranger: { kind: 'humanoid', body: '#3f7d3f', head: '#e8b98e', limb: '#2c5a2c', accent: '#a7d36b', eye: '#1b2233', weapon: 'bow', hood: '#2f6a32' },
   mage: { kind: 'humanoid', body: '#7a3fb5', head: '#f0c9a0', limb: '#55287f', accent: '#ff8a3d', eye: '#1b2233', weapon: 'staff', hat: '#5a2a8f', orb: '#ff8a3d' },
   healer: { kind: 'humanoid', body: '#e8e4d8', head: '#f3cfa8', limb: '#b8b2a0', accent: '#4cc9a0', eye: '#1b2233', weapon: 'staff', orb: '#7dffcf', halo: true },
   rogue: { kind: 'humanoid', body: '#2b2d42', head: '#d9a77c', limb: '#1e2033', accent: '#e63946', eye: '#f1f1f1', weapon: 'daggers', mask: '#e63946' },
-  goblin: { kind: 'humanoid', body: '#7a5a30', head: '#7fbf4f', limb: '#5d8f3a', accent: '#c9a050', eye: '#ffde59', weapon: 'club', ears: true, small: true },
-  skeleton: { kind: 'humanoid', body: '#d8d4c4', head: '#ece8da', limb: '#c4bfac', accent: '#6b6455', eye: '#ff4d4d', weapon: 'bow', bones: true },
-  orc: { kind: 'humanoid', body: '#6b4a3a', head: '#5f8f4a', limb: '#4f7a3c', accent: '#b03a2e', eye: '#ffde59', weapon: 'axe', tusks: true, big: true },
-  slime: { kind: 'slime', body: '#4cd16b', dark: '#2c9a48', eye: '#0e2a14' },
-  bat: { kind: 'bat', body: '#4a3a6b', wing: '#6b4f9a', eye: '#ffde59' },
-  golem: { kind: 'golem', body: '#8a8478', dark: '#5f5a50', accent: '#6fd3ff', eye: '#6fd3ff' },
+  imp: { kind: 'humanoid', body: '#7a5a30', head: '#7fbf4f', limb: '#5d8f3a', accent: '#c9a050', eye: '#ffde59', weapon: 'club', ears: true, small: true },
+  medusa: { kind: 'humanoid', body: '#d8d4c4', head: '#ece8da', limb: '#c4bfac', accent: '#6b6455', eye: '#ff4d4d', weapon: 'bow', bones: true },
+  jinn: { kind: 'humanoid', body: '#6b4a3a', head: '#5f8f4a', limb: '#4f7a3c', accent: '#b03a2e', eye: '#ffde59', weapon: 'axe', tusks: true, big: true },
+  lizard: { kind: 'slime', body: '#4cd16b', dark: '#2c9a48', eye: '#0e2a14' },
+  drake: { kind: 'bat', body: '#4a3a6b', wing: '#6b4f9a', eye: '#ffde59' },
+  dragon: { kind: 'golem', body: '#8a8478', dark: '#5f5a50', accent: '#6fd3ff', eye: '#6fd3ff' },
 };
 
 const POSES = {

@@ -23,7 +23,7 @@ Stack: **Phaser 3 + TypeScript + Vite**, static build, portrait, mobile-first, t
   Every attack made and every hit taken charges **energy**. At 100 the unit casts its **one ability**.
   At 30 s **sudden death** starts and damage ramps up. At 45 s the side with more of its health left wins.
   ×1/×2 speed button.
-- **Ladder.** 10 stages, from *Slime Pit* to the *Golem King* boss. Clearing a stage unlocks the next. Stars = your units still standing (min 1).
+- **Ladder.** 10 stages, from *Lizard Marsh* to the *Dragon King* boss. Clearing a stage unlocks the next. Stars = your units still standing (min 1).
   Progress and the last team are kept in `localStorage`.
 - **Unit cards (AWIs).** Each card has a **class**, a **rarity tier**, **attack / health / speed** and **one ability**:
 
@@ -43,7 +43,9 @@ Stack: **Phaser 3 + TypeScript + Vite**, static build, portrait, mobile-first, t
 - **Collection bonus.** 2 units from the same NFT collection give the **whole team** +15%, and 3 give +30% with abilities starting half charged.
   Each collection always gives the same buff (Might = attack, Vigor = health, Haste = speed), picked by a hash of the collection id.
 - **Guests** get 5 free Common units (one per class). Default team: Warrior, Ranger, Healer.
-- **Monsters:** Slime (splits once at half health), Bat (Drain), Goblin (Frenzy), Skeleton archer (Volley), Orc (War Cry), Golem (Ground Slam). Each stage adds +6% stats.
+- **Monsters:** Lizard (Call Kin: a little lizard joins once, at half health), Drake (Fire Bite: heals itself), Imp (Frenzy), Medusa (ranged, Volley),
+  Jinn (Dark Blessing: allies hit harder), Dragon (Tail Sweep: area stun; the stage 10 boss). Each stage adds +6% stats.
+  (Until 2026-11-21 these were Slime / Bat / Goblin / Skeleton / Orc / Golem, renamed to match the art; the stats did not change.)
 
 ### Balance targets (checked with `npm run sim`)
 `npm run sim` runs every guest team and some NFT-style teams against every stage, with 40–60 seeds each, in about 2 s.
@@ -52,7 +54,7 @@ The battle code is plain TypeScript with no Phaser, run by Node directly. Result
 - Rare/Epic teams reach stages 8–9. A Rare team with the 3-collection bonus clears stage 9.
 - Only Legendary teams (or very good luck) beat the stage 10 boss.
 - Median battle length: about 25 s.
-- Single Rare NFT units next to a Rare Knight and Cleric: Pyromancer, Frost Mage, Sniper and Duelist teams stall at stage 7 (the Golem); tune in milestone 3.
+- Single Rare NFT units next to a Rare Knight and Cleric: Pyromancer, Frost Mage, Sniper and Duelist teams stall at stage 7 (the Dragon); tune in milestone 3.
 
 So a guest demo plays well, and connecting real NFTs is visibly what gets you to the top. That is the TheoSwap pitch.
 
@@ -106,22 +108,25 @@ The repo is **open source** (MIT). Art that may not be redistributed is never co
 - `npm run check-assets` (pre-commit hook + CI) blocks licensed files, non-CC0 files in `cc0/`, unlisted media, `.env` files and keys.
 - [ASSETS.md](ASSETS.md) is generated and lists every file to supply.
 
-**Suggested packs (download yourself; licences checked 2026-11-15, check again on download):**
-- **Monsters:** [CraftPix: Free RPG Monster Sprites Pixel Art](https://craftpix.net/freebies/free-rpg-monster-sprites-pixel-art/):
-  6 monsters, 128×128 frames, idle/walk/attack/hurt/death. Same frame size as the manifest, so it packs 1:1. CraftPix freebie licence: commercial use OK, no redistribution.
-- **Card frames:** [Batareya: Pixel Art CCG-like Frames](https://batareya.itch.io/pixel-art-ccg-like-frames) (free pack, 25 frames, 64×96, packed 3× to 192×288).
-  Commercial use OK, no redistribution.
+**Packs in use (download them yourself; licences checked 2026-11-21, check again on download).**
+Unzip each into its own folder under `art-src/` (gitignored), then `npm run assets:pack-arena` writes all 62 licensed files:
+- **Heroes:** CraftPix [Knight Characters Free Sprite](https://craftpix.net/freebies/knight-character-free-sprite/) (silver knight → Warrior,
+  bronze knight → Ranger, black knight → Rogue) and [Wizard Character Free Sprite](https://craftpix.net/freebies/wizard-character-free-sprite/)
+  (fire wizard → Mage, purple wizard → Healer; the ice wizard is unused). Cartoon art, not pixel art, so it is scaled smoothly.
+- **Monsters:** CraftPix [Free RPG Monster Sprites Pixel Art](https://craftpix.net/freebies/free-rpg-monster-sprites-pixel-art/):
+  lizard, small dragon (Drake), demon (Imp), medusa, jinn, dragon. Pixel art, nearest-neighbour scaling.
+- **Card frames:** [Batareya: Pixel Art CCG-like Frames](https://batareya.itch.io/pixel-art-ccg-like-frames): bases 1 / 11 / 25 / 10 for
+  Common / Rare / Epic / Legendary, 3×, Rare and Epic tinted blue and purple. The `.rar` needs `unrar` or `7z` (7z could not unpack 4 of its 25 frames; none of them are used).
   *Avoid* LayerLab's free "GUI – Card Frame": its licence needs written approval for NFT/blockchain use.
-- **FX:** [Free Game Assets (CraftPix): Free Pixel Magic Sprite Effects Pack](https://free-game-assets.itch.io/free-pixel-magic-sprite-effects-pack):
-  heal, spark, charm and more. The page gives no licence; the publisher points to the CraftPix licence.
-- **Hero classes (unit-card battlers):** CraftPix freebies in the same pixel style as the monsters (licensed/, not in git). Their animation lists are not published, so check on download:
-  [Knight Character Free Sprite](https://craftpix.net/freebies/knight-character-free-sprite/) Swordsman → Warrior ·
-  [Free Tiny Pixel Hero Sprites with Bow Attacks](https://craftpix.net/?p=71864) → Ranger (idle/walk/attack; no hurt/death listed) ·
-  [Free Wizard Sprite Sheets](https://free-game-assets.itch.io/free-wizard-sprite-sheets-pixel-art) fire mage → Mage, light magician → Healer, dark magician → Rogue (stand-in).
-  No free pack found yet with all five classes and hurt/death animations. Paid fallback: [gegx Heroes & Classes](https://gegx.itch.io/heroes-classes) (€6.99, 4-direction, no hurt/death, tagged AI-assisted).
-- **UI (milestone 3, CC0, so it can be committed in `cc0/`):** [Kenney Fantasy UI Borders](https://kenney.nl/assets/fantasy-ui-borders) (140 files: panels and frames)
-  and [Kenney Pixel UI Pack](https://kenney.nl/assets/pixel-ui-pack) (750 files: buttons, bars, panels). Both are listed as CC0 on kenney.nl.
-  Buttons and panels are drawn in code today; using these means adding 9-slice panel/button keys to the manifest.
+- **FX:** [Free Pixel Magic Sprite Effects Pack](https://free-game-assets.itch.io/free-pixel-magic-sprite-effects-pack): explosion (smoke burst, tinted in game),
+  heal (hearts), stun (rune ring). Its slash is a solid white beam that hides the fighters, so the slash stays on our own art.
+- CraftPix licence (all of the above, via the publisher): free for commercial use, no redistribution of the files, no AI training.
+- Unit frames are 288×160 so weapon swings and death falls fit; feet stand at the frame centre, 10 px above the bottom.
+  A few swings still lose their tip (rogue and healer attacks, lizard attack and death, the top of the jinn's death).
+- Downloaded but not used: Free Tiny Pixel Hero Sprites with Bow Attacks, Free Wizard Sprite Sheets (pixel), both clash with the chosen heroes.
+- **UI, still to do (CC0, so it can be committed in `cc0/`):** [Kenney Fantasy UI Borders](https://kenney.nl/assets/fantasy-ui-borders)
+  and [Kenney Pixel UI Pack](https://kenney.nl/assets/pixel-ui-pack) are downloaded. Buttons and panels are drawn in code today;
+  using these means adding 9-slice panel/button keys to the manifest.
 
 ## Secrets
 - **No API key in commits or in the browser.** The game only calls its own server: `./api/user-items?userCode=…`.

@@ -52,7 +52,8 @@ skipped with a warning, so it can't break the game.
    to the frame size, aligns characters to the bottom edge, and writes a horizontal strip into \`${cc}/\` for
    CC0 sources or \`${lic}/\` for everything else:
    \`\`\`bash
-   npm run assets:pack -- unit.slime.attack ~/Downloads/altered-arena-art/monsters/Slime/Attack*.png
+   npm run assets:pack-arena            # all packs at once, from art-src/ (see PLAN.md → Art)
+   npm run assets:pack -- unit.lizard.attack art-src/<monster pack>/PNG/lizard/Attack*.png
    npm run assets:pack -- card.legendary ~/Downloads/altered-arena-art/frames/frame_07.png
    \`\`\`
    (You can also make the strips yourself in any editor: the table gives the exact size and frame layout.)

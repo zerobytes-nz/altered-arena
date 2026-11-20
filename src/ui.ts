@@ -40,6 +40,8 @@ export function muteButton(scene: Phaser.Scene, x: number, y: number, r = 30) {
   return c;
 }
 
+const CARD_FILL: Record<UnitDef['rarity'], number> = { Common: 0x24212e, Rare: 0x14263d, Epic: 0x261540, Legendary: 0x33240c };
+
 const fmtSpd = (s: number) => s.toFixed(2).replace(/0$/, '');
 
 /**
@@ -49,6 +51,7 @@ const fmtSpd = (s: number) => s.toFixed(2).replace(/0$/, '');
 export function unitCard(scene: Phaser.Scene, x: number, y: number, u: UnitDef, scale = 1): Phaser.GameObjects.Container {
   const r = u.rarity.toLowerCase();
   const items: Phaser.GameObjects.GameObject[] = [];
+  items.push(scene.add.rectangle(0, 0, 176, 272, CARD_FILL[u.rarity])); // shows through frames with an open centre
   items.push(scene.add.image(0, 0, `card.${r}`));
   const spr = scene.add.sprite(0, 6, `unit.${u.art}.idle`).setOrigin(0.5, 1).play(`unit.${u.art}.idle`);
   spr.anims.setProgress((u.uid.length * 0.37) % 1); // cards side by side don't bob in step
