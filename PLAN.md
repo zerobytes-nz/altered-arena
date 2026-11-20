@@ -23,8 +23,18 @@ Stack: **Phaser 3 + TypeScript + Vite**, static build, portrait, mobile-first, t
   Every attack made and every hit taken charges **energy**. At 100 the unit casts its **one ability**.
   At 30 s **sudden death** starts and damage ramps up. At 45 s the side with more of its health left wins.
   ×1/×2 speed button.
+- **Rows.** Slot 1 on the team screen is the **front**: that unit stands forward and takes 20% less damage. Slots 2–3 are the back row.
+  Enemies line up the same way (mirrored).
+- **Tap to cast.** When a unit's ability is charged its team-strip card glows **TAP!**. Tap it (or the unit) to cast now at **+15% power**
+  ("WELL TIMED"). If you don't, it casts by itself after 3 s, so hands-off play still works. Enemies always cast at once.
 - **Ladder.** 10 stages, from *Lizard Marsh* to the *Dragon King* boss. Clearing a stage unlocks the next. Stars = your units still standing (min 1).
-  Progress and the last team are kept in `localStorage`.
+  Progress and the last team are kept in `localStorage`. Each team screen shows a **💡 counter tip** for the stage, and a ★ on the cards whose ability is good against it.
+- **Ladder run: pick 1 of 3 rewards.** Each time you clear a stage further than your run has reached, pick a reward
+  (+20% attack / +25% health / +20% speed for one unit, +8% attack and health for the team, or abilities start 40% charged).
+  Rewards stack and last until you **lose** a ladder fight (or beat the Dragon King). `src/modes/run.ts`.
+- **Daily challenge.** One fixed fight per UTC day (3–4 monsters, same seed for everyone). Keeps your best stars and time; *Share result* sends "★★★ in 15 s". `src/modes/daily.ts`.
+- **Friend battles.** Your team as a 7-character code (`ABC-1234`, also a `?vs=CODE` link). Your friend types it in (menu → *Friend battle*) or opens the link
+  and fights your team, with its collection bonus. No server needed. `src/modes/teamcode.ts`.
 - **Unit cards (AWIs).** Each card has a **class**, a **rarity tier**, **attack / health / speed** and **one ability**:
 
   | Class | Role | Ability |
@@ -43,18 +53,19 @@ Stack: **Phaser 3 + TypeScript + Vite**, static build, portrait, mobile-first, t
 - **Collection bonus.** 2 units from the same NFT collection give the **whole team** +15%, and 3 give +30% with abilities starting half charged.
   Each collection always gives the same buff (Might = attack, Vigor = health, Haste = speed), picked by a hash of the collection id.
 - **Guests** get 5 free Common units (one per class). Default team: Warrior, Ranger, Healer.
+- **Juice:** hit-stop on crits and casts, a cast banner, a boss intro on stage 10 (camera zooms in, roar, name), victory confetti, a glowing aura under Legendary units.
 - **Monsters:** Lizard (Call Kin: a little lizard joins once, at half health), Drake (Fire Bite: heals itself), Imp (Frenzy), Medusa (ranged, Volley),
   Jinn (Dark Blessing: allies hit harder), Dragon (Tail Sweep: area stun; the stage 10 boss). Each stage adds +6% stats.
   (Until 2026-11-21 these were Slime / Bat / Goblin / Skeleton / Orc / Golem, renamed to match the art; the stats did not change.)
 
 ### Balance targets (checked with `npm run sim`)
 `npm run sim` runs every guest team and some NFT-style teams against every stage, with 40–60 seeds each, in about 2 s.
-The battle code is plain TypeScript with no Phaser, run by Node directly. Results at commit time:
-- Guest teams clear stages 1–5. Good guest picks (Warrior + Healer + one more) clear stage 6. Stage 7 needs NFT units.
-- Rare/Epic teams reach stages 8–9. A Rare team with the 3-collection bonus clears stage 9.
-- Only Legendary teams (or very good luck) beat the stage 10 boss.
-- Median battle length: about 25 s.
-- Single Rare NFT units next to a Rare Knight and Cleric: Pyromancer, Frost Mage, Sniper and Duelist teams stall at stage 7 (the Dragon); tune in milestone 3.
+The battle code is plain TypeScript with no Phaser, run by Node directly. Results after the milestone 3 balance pass (auto-cast, no tapping; tapping makes every team a bit stronger):
+- Guest teams clear stages 1–5; good guest picks (Warrior + Healer + one more) reach stage 6–8.
+- Rare NFT teams reach stage 9 (Rare Warrior + Ranger + Healer: 53% at stage 9). Every single Rare NFT unit next to a Rare Knight and Cleric clears stage 8.
+- Stage 10 (the Dragon King): Rare 0%, Epic 82%, Rare with the 3-collection bonus 100%, Rare with 4 run rewards 100%, Legendary 100%.
+- Median battle length: 26 s.
+- Stage order changed: Ash Peaks (dragon + medusa + jinn) is now stage 8, War Band stage 9.
 
 So a guest demo plays well, and connecting real NFTs is visibly what gets you to the top. That is the TheoSwap pitch.
 
@@ -89,10 +100,11 @@ So a guest demo plays well, and connecting real NFTs is visibly what gets you to
 - Not checked yet: a live call with the test key (no `.env` here), and real phones.
 
 ### 3. Polish and deploy
-- Real art: the packs below in `public/assets/licensed/` (not in git). Pixel-art filtering is already handled (`pixelArt` in the manifest).
-- Juice: hit-stop, a better ability banner, victory confetti, unit level-up between stages.
-- Balance pass on a real phone, with players.
-- Deploy to `games.theoswap.io/altered-arena` (same nginx proxy pattern as Altered Run, see README). Set the game's website to `…/?userCode=$USER_CODE`.
+- Done (2026-11-21): real art (below), Kenney CC0 UI (9-slice buttons and panel frames), the Frost Mage's own ice-wizard art,
+  rows, tap-to-cast, counter tips, the ladder run with rewards, the daily challenge, friend battles, juice, and the balance pass above.
+  Checked in the browser pane at 375×812; not yet on a real phone.
+- Still to do: deploy to `games.theoswap.io/altered-arena` (same nginx proxy pattern as Altered Run, see README) and set the game's website to
+  `…/?userCode=$USER_CODE`; game icon, banner and item images on TheoSwap; publish config 16 (Developer page). Balance with real players.
 
 ### 4. Optional: "Your NFT in other games"
 A screen per NFT: its unit card here next to what it is in Altered Run (and any other TheoSwap game).
@@ -102,17 +114,17 @@ This needs a TheoSwap endpoint or a second config lookup. Ask before changing Th
 The repo is **open source** (MIT). Art that may not be redistributed is never committed, using the same rails as Altered Run:
 - `assets.manifest.json` is the single source of truth: every asset's key, path, size, frames, animation, use, source pack, and `pixelArt`.
 - `public/assets/placeholder/`: committed original art from `scripts/placeholder-art.mjs` (byte-for-byte reproducible; CI checks it).
-- `public/assets/cc0/`: committed CC0 art (none yet).
+- `public/assets/cc0/`: committed CC0 art (Kenney UI: `ui/button.png`, `ui/panel.png`).
 - `public/assets/licensed/`: **gitignored**, your own copies of licensed packs.
 - The game picks `licensed/` → `cc0/` → `placeholder/` file by file, by exact pixel size.
 - `npm run check-assets` (pre-commit hook + CI) blocks licensed files, non-CC0 files in `cc0/`, unlisted media, `.env` files and keys.
 - [ASSETS.md](ASSETS.md) is generated and lists every file to supply.
 
 **Packs in use (download them yourself; licences checked 2026-11-21, check again on download).**
-Unzip each into its own folder under `art-src/` (gitignored), then `npm run assets:pack-arena` writes all 62 licensed files:
+Unzip each into its own folder under `art-src/` (gitignored), then `npm run assets:pack-arena` writes all 67 licensed files:
 - **Heroes:** CraftPix [Knight Characters Free Sprite](https://craftpix.net/freebies/knight-character-free-sprite/) (silver knight → Warrior,
   bronze knight → Ranger, black knight → Rogue) and [Wizard Character Free Sprite](https://craftpix.net/freebies/wizard-character-free-sprite/)
-  (fire wizard → Mage, purple wizard → Healer; the ice wizard is unused). Cartoon art, not pixel art, so it is scaled smoothly.
+  (fire wizard → Mage, purple wizard → Healer, ice wizard → the Frost Mage NFT unit). Cartoon art, not pixel art, so it is scaled smoothly.
 - **Monsters:** CraftPix [Free RPG Monster Sprites Pixel Art](https://craftpix.net/freebies/free-rpg-monster-sprites-pixel-art/):
   lizard, small dragon (Drake), demon (Imp), medusa, jinn, dragon. Pixel art, nearest-neighbour scaling.
 - **Card frames:** [Batareya: Pixel Art CCG-like Frames](https://batareya.itch.io/pixel-art-ccg-like-frames): bases 1 / 11 / 25 / 10 for
@@ -124,9 +136,9 @@ Unzip each into its own folder under `art-src/` (gitignored), then `npm run asse
 - Unit frames are 288×160 so weapon swings and death falls fit; feet stand at the frame centre, 10 px above the bottom.
   A few swings still lose their tip (rogue and healer attacks, lizard attack and death, the top of the jinn's death).
 - Downloaded but not used: Free Tiny Pixel Hero Sprites with Bow Attacks, Free Wizard Sprite Sheets (pixel), both clash with the chosen heroes.
-- **UI, still to do (CC0, so it can be committed in `cc0/`):** [Kenney Fantasy UI Borders](https://kenney.nl/assets/fantasy-ui-borders)
-  and [Kenney Pixel UI Pack](https://kenney.nl/assets/pixel-ui-pack) are downloaded. Buttons and panels are drawn in code today;
-  using these means adding 9-slice panel/button keys to the manifest.
+- **UI (CC0, committed in `public/assets/cc0/ui/`):** [Kenney Pixel UI Pack](https://kenney.nl/assets/pixel-ui-pack) `9-slice/Ancient/white.png` → `ui.button`
+  and [Kenney Fantasy UI Borders](https://kenney.nl/assets/fantasy-ui-borders) `Border/panel-border-001.png` → `ui.panel`. Both are white, drawn as
+  9-slice at 2× and tinted in code (`button()` and `frame()` in `src/ui.ts`).
 
 ## Secrets
 - **No API key in commits or in the browser.** The game only calls its own server: `./api/user-items?userCode=…`.

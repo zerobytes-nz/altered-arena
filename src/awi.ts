@@ -39,7 +39,7 @@ export function unitsFromItems(results: ApiItem[]): UnitDef[] {
     for (let n = 2; seen.has(uid); n++) uid = `${uid}~${n}`;
     seen.add(uid);
     out.push(makeUnit(def.cls, pickRarity(r.itemData?.Rarity), {
-      uid, name: `${def.name} #${token}`, ability: def.ability, collection: collectionOf(r), source: 'nft',
+      uid, name: `${def.name} #${token}`, ability: def.ability, art: def.art, collection: collectionOf(r), source: 'nft',
     }));
   }
   return out.sort((a, b) => RARITIES.indexOf(b.rarity) - RARITIES.indexOf(a.rarity));

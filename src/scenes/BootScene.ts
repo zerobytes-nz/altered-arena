@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { GAME_W, GAME_H, COLORS } from '../config.ts';
 import { preloadAll, setupAssets } from '../assets.ts';
 import { normalizeCode } from '../theoswap.ts';
+import { decodeTeam } from '../modes/teamcode.ts';
 
 export class BootScene extends Phaser.Scene {
   constructor() { super('Boot'); }
@@ -24,6 +25,14 @@ export class BootScene extends Phaser.Scene {
       url.searchParams.delete('userCode');
       history.replaceState(null, '', url); // a reload shouldn't connect again
       this.scene.start('Connect', { code });
+      return;
+    }
+    // Friend link (…/?vs=ABC-1234): straight to the team screen against that team.
+    const vs = (url.searchParams.get('vs') ?? '').replace(/[^0-9a-z]/gi, '').toUpperCase();
+    if (vs && decodeTeam(vs)) {
+      url.searchParams.delete('vs');
+      history.replaceState(null, '', url);
+      this.scene.start('Team', { mode: { kind: 'friend', code: `${vs.slice(0, 3)}-${vs.slice(3)}` } });
     } else this.scene.start('Menu');
   }
 }

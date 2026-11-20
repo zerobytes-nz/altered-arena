@@ -4,6 +4,8 @@ import { button, muteButton, notice, text } from '../ui.ts';
 import { stage, STAGE_COUNT } from '../battle/stages.ts';
 import { isUnlocked, loadLadder, nextStage, nftUnits } from '../state.ts';
 import { loadProfile } from '../profile.ts';
+import { loadBest, today } from '../modes/daily.ts';
+import { ladder } from '../modes/fight.ts';
 import { canInstall, install, isInstalled, onInstallChange, openInChromeUrl, tryCloseApp } from '../systems/install.ts';
 import { sfx } from '../systems/audio.ts';
 
@@ -28,7 +30,10 @@ export class MenuScene extends Phaser.Scene {
     });
 
     this.ladder();
-    this.fight = button(this, GAME_W / 2, 1132, '', () => this.play(), 460, 100, COLORS.accent, 36);
+    this.fight = button(this, GAME_W / 2, 1100, '', () => this.play(), 460, 96, COLORS.accent, 36);
+    const best = loadBest();
+    button(this, GAME_W / 2 - 145, 1000, best ? `📅 Daily ${'★'.repeat(best.stars) || '✗'}` : '📅 Daily challenge', () => this.scene.start('Team', { mode: { kind: 'daily', date: today() } }), 270, 64, 0x2a5a8a, 22);
+    button(this, GAME_W / 2 + 145, 1000, '⚔ Friend battle', () => this.scene.start('Friends'), 270, 64, 0x6c1d45, 22);
     this.select(this.selected);
     muteButton(this, GAME_W - 50, 50);
     this.appButtons();
@@ -39,7 +44,7 @@ export class MenuScene extends Phaser.Scene {
   /** Ten stage rows, stage 10 at the top. */
   private ladder(): void {
     const lad = loadLadder();
-    const top = 440, h = 58;
+    const top = 430, h = 52;
     this.rows = [];
     for (let n = STAGE_COUNT; n >= 1; n--) {
       const y = top + (STAGE_COUNT - n) * h + h / 2;
@@ -70,7 +75,7 @@ export class MenuScene extends Phaser.Scene {
       const o = screen.orientation as ScreenOrientation & { lock?: (o: string) => Promise<void> };
       o?.lock?.('portrait').catch(() => {});
     }
-    this.scene.start('Team', { stage: this.selected });
+    this.scene.start('Team', { mode: ladder(this.selected) });
   }
 
   /** Bottom: connect TheoSwap, or who is connected and how many AWIs they brought. */
@@ -78,7 +83,7 @@ export class MenuScene extends Phaser.Scene {
     const p = loadProfile();
     const n = nftUnits().length;
     const label = p ? `👤 ${p.label} · ${n} AWI${n === 1 ? '' : 's'}` : '🔗 Connect TheoSwap: use your NFTs';
-    const b = button(this, GAME_W / 2, 1240, label, () => this.scene.start('Connect'), 560, 60, p ? COLORS.panel : COLORS.good, 22);
+    const b = button(this, GAME_W / 2, 1218, label, () => this.scene.start('Connect'), 560, 60, p ? COLORS.panel : COLORS.good, 22);
     if (b.label.width > 530) b.label.setScale(530 / b.label.width);
   }
 

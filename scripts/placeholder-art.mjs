@@ -24,6 +24,7 @@ const UNITS = {
   warrior: { kind: 'humanoid', body: '#5b7bb5', head: '#f0c9a0', limb: '#3d4f7a', accent: '#e0b030', eye: '#1b2233', weapon: 'sword', shield: '#8a9bb5', helm: '#aab6cc' },
   ranger: { kind: 'humanoid', body: '#3f7d3f', head: '#e8b98e', limb: '#2c5a2c', accent: '#a7d36b', eye: '#1b2233', weapon: 'bow', hood: '#2f6a32' },
   mage: { kind: 'humanoid', body: '#7a3fb5', head: '#f0c9a0', limb: '#55287f', accent: '#ff8a3d', eye: '#1b2233', weapon: 'staff', hat: '#5a2a8f', orb: '#ff8a3d' },
+  frostmage: { kind: 'humanoid', body: '#3f7fc5', head: '#f0c9a0', limb: '#2a5a8f', accent: '#9fe8ff', eye: '#1b2233', weapon: 'staff', hat: '#2a5a8f', orb: '#9fe8ff' },
   healer: { kind: 'humanoid', body: '#e8e4d8', head: '#f3cfa8', limb: '#b8b2a0', accent: '#4cc9a0', eye: '#1b2233', weapon: 'staff', orb: '#7dffcf', halo: true },
   rogue: { kind: 'humanoid', body: '#2b2d42', head: '#d9a77c', limb: '#1e2033', accent: '#e63946', eye: '#f1f1f1', weapon: 'daggers', mask: '#e63946' },
   imp: { kind: 'humanoid', body: '#7a5a30', head: '#7fbf4f', limb: '#5d8f3a', accent: '#c9a050', eye: '#ffde59', weapon: 'club', ears: true, small: true },
@@ -354,6 +355,17 @@ for (const id of Object.keys(UNITS)) for (const a of Object.keys(POSES)) drawers
 for (const r of Object.keys(CARD)) drawers[`card.${r}`] = card(r);
 for (const id of Object.keys(ICON_COL)) drawers[`ui.icon.${id}`] = icon(id);
 Object.assign(drawers, {
+  // 9-slice button: white face, light top edge, darker bottom bevel (tinted in game)
+  'ui.button': (c, w, h) => {
+    c.fillStyle = '#9a9aa6'; rr(c, 0, 4, w, h - 4, 6);
+    c.fillStyle = '#ffffff'; rr(c, 0, 0, w, h - 6, 6);
+    c.fillStyle = 'rgba(255,255,255,0.6)'; c.fillRect(6, 2, w - 12, 2);
+  },
+  // 9-slice panel frame: white border with corner studs, empty centre
+  'ui.panel': (c, w, h) => {
+    c.strokeStyle = '#ffffff'; c.lineWidth = 4; c.strokeRect(6, 6, w - 12, h - 12);
+    c.fillStyle = '#ffffff'; for (const [x, y] of [[2, 2], [w - 10, 2], [2, h - 10], [w - 10, h - 10]]) c.fillRect(x, y, 8, 8);
+  },
   'ui.slot': slot,
   'fx.slash': slash, 'fx.explosion': explosion, 'fx.heal': heal, 'fx.stun': stun,
   'fx.arrow': arrow, 'fx.orb': orb, 'fx.ring': ring,

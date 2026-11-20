@@ -40,6 +40,20 @@
       "url": "https://craftpix.net/freebies/wizard-character-free-sprite/",
       "licence": "craftpix.net Freebies licence: free for commercial and personal projects; the raw files must NOT be redistributed. Keep them in public/assets/licensed/ (gitignored). The licence also bans using the files to train AI.",
       "licenceUrl": "https://craftpix.net/file-licenses/"
+    },
+    "kenney-pixel-ui": {
+      "name": "Kenney: Pixel UI Pack",
+      "url": "https://kenney.nl/assets/pixel-ui-pack",
+      "licence": "CC0 1.0 (public domain): License.txt in the pack. May be committed.",
+      "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "cc0": true
+    },
+    "kenney-fantasy-borders": {
+      "name": "Kenney: Fantasy UI Borders",
+      "url": "https://kenney.nl/assets/fantasy-ui-borders",
+      "licence": "CC0 1.0 (public domain): License.txt in the pack. May be committed.",
+      "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "cc0": true
     }
   },
   "assets": [
@@ -342,6 +356,106 @@
       "notes": "Side view facing right, feet at the bottom-centre of the frame (y ≈ 147), body about 100–110 px tall. Frames are wide so swings and death falls fit.",
       "pixelArt": false,
       "sourceFiles": "PNG/wizard_fire/*DIE_*.png (npm run assets:pack-arena)"
+    },
+    {
+      "key": "unit.frostmage.idle",
+      "type": "spritesheet",
+      "path": "units/frostmage/idle.png",
+      "width": 1152,
+      "height": 160,
+      "frameWidth": 288,
+      "frameHeight": 160,
+      "frameCount": 4,
+      "displayScale": 1,
+      "usedFor": "NFT unit Frost Mage (a Mage variant) (staff, fire), idle loop (standing in the arena, on cards)",
+      "source": "craftpix-wizard-chars",
+      "animation": {
+        "frameRate": 6,
+        "repeat": -1
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame (y ≈ 147), body about 100–110 px tall. Frames are wide so swings and death falls fit.",
+      "pixelArt": false,
+      "sourceFiles": "PNG/wizard_ice/*IDLE_*.png (npm run assets:pack-arena)"
+    },
+    {
+      "key": "unit.frostmage.walk",
+      "type": "spritesheet",
+      "path": "units/frostmage/walk.png",
+      "width": 1728,
+      "height": 160,
+      "frameWidth": 288,
+      "frameHeight": 160,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "NFT unit Frost Mage (a Mage variant) (staff, fire), walk cycle (moving to a target)",
+      "source": "craftpix-wizard-chars",
+      "animation": {
+        "frameRate": 10,
+        "repeat": -1
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame (y ≈ 147), body about 100–110 px tall. Frames are wide so swings and death falls fit.",
+      "pixelArt": false,
+      "sourceFiles": "PNG/wizard_ice/*WALK_*.png (npm run assets:pack-arena)"
+    },
+    {
+      "key": "unit.frostmage.attack",
+      "type": "spritesheet",
+      "path": "units/frostmage/attack.png",
+      "width": 1728,
+      "height": 160,
+      "frameWidth": 288,
+      "frameHeight": 160,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "NFT unit Frost Mage (a Mage variant) (staff, fire), attack (plays once per hit; the hit lands on frame 3)",
+      "source": "craftpix-wizard-chars",
+      "animation": {
+        "frameRate": 14,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame (y ≈ 147), body about 100–110 px tall. Frames are wide so swings and death falls fit.",
+      "pixelArt": false,
+      "sourceFiles": "PNG/wizard_ice/*ATTACK_*.png (npm run assets:pack-arena)"
+    },
+    {
+      "key": "unit.frostmage.hurt",
+      "type": "spritesheet",
+      "path": "units/frostmage/hurt.png",
+      "width": 576,
+      "height": 160,
+      "frameWidth": 288,
+      "frameHeight": 160,
+      "frameCount": 2,
+      "displayScale": 1,
+      "usedFor": "NFT unit Frost Mage (a Mage variant) (staff, fire), hurt flinch (plays once when hit hard)",
+      "source": "craftpix-wizard-chars",
+      "animation": {
+        "frameRate": 10,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame (y ≈ 147), body about 100–110 px tall. Frames are wide so swings and death falls fit.",
+      "pixelArt": false,
+      "sourceFiles": "PNG/wizard_ice/*HURT_*.png (npm run assets:pack-arena)"
+    },
+    {
+      "key": "unit.frostmage.dead",
+      "type": "spritesheet",
+      "path": "units/frostmage/dead.png",
+      "width": 1728,
+      "height": 160,
+      "frameWidth": 288,
+      "frameHeight": 160,
+      "frameCount": 6,
+      "displayScale": 1,
+      "usedFor": "NFT unit Frost Mage (a Mage variant) (staff, fire), death (plays once, holds the last frame)",
+      "source": "craftpix-wizard-chars",
+      "animation": {
+        "frameRate": 10,
+        "repeat": 0
+      },
+      "notes": "Side view facing right, feet at the bottom-centre of the frame (y ≈ 147), body about 100–110 px tall. Frames are wide so swings and death falls fit.",
+      "pixelArt": false,
+      "sourceFiles": "PNG/wizard_ice/*DIE_*.png (npm run assets:pack-arena)"
     },
     {
       "key": "unit.healer.idle",
@@ -1280,6 +1394,36 @@
       "displayScale": 1,
       "usedFor": "empty team slot in the team builder (dashed outline)",
       "source": "own"
+    },
+    {
+      "key": "ui.button",
+      "type": "image",
+      "path": "ui/button.png",
+      "width": 48,
+      "height": 48,
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "frameCount": 1,
+      "displayScale": 1,
+      "usedFor": "every button: a white 9-slice (corners 8 px, bottom bevel), tinted with the button colour and drawn at 2×",
+      "source": "kenney-pixel-ui",
+      "pixelArt": true,
+      "sourceFiles": "9-Slice/Ancient/white.png"
+    },
+    {
+      "key": "ui.panel",
+      "type": "image",
+      "path": "ui/panel.png",
+      "width": 48,
+      "height": 48,
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "frameCount": 1,
+      "displayScale": 1,
+      "usedFor": "panel border (pop-ups, reward choices): a white 9-slice frame (corners 16 px), tinted, drawn at 2×",
+      "source": "kenney-fantasy-borders",
+      "pixelArt": true,
+      "sourceFiles": "PNG/Default/Border/panel-border-001.png"
     },
     {
       "key": "fx.slash",

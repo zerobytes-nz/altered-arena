@@ -57,13 +57,16 @@ export const ABILITIES: Record<AbilityId, { name: string; text: string }> = {
   flurry: { name: 'Flurry', text: 'Four quick hits on the target.' },
 };
 
+/** Sprite sets: one per class and monster, plus variants for some NFT units. */
+export type ArtId = ClassId | MonsterId | 'frostmage';
+
 export interface Collection { id: string; name: string }
 
 /** One unit card: a guest unit, an NFT's unit-card AWI, or a monster. */
 export interface UnitDef {
   uid: string;
   name: string;
-  art: ClassId | MonsterId;   // sprite id: manifest keys unit.<art>.<anim>
+  art: ArtId;                 // sprite id: manifest keys unit.<art>.<anim>
   cls: ClassId | null;        // null for monsters
   rarity: Rarity;
   hp: number; atk: number; spd: number; range: number; move: number;
@@ -74,10 +77,10 @@ export interface UnitDef {
   boss?: boolean;
 }
 
-export function makeUnit(cls: ClassId, rarity: Rarity, opts: { uid: string; name?: string; ability?: AbilityId; collection?: Collection | null; source?: 'guest' | 'nft' }): UnitDef {
+export function makeUnit(cls: ClassId, rarity: Rarity, opts: { uid: string; name?: string; ability?: AbilityId; art?: ArtId; collection?: Collection | null; source?: 'guest' | 'nft' | 'enemy' }): UnitDef {
   const b = CLASSES[cls], k = RARITY_STAT[rarity];
   return {
-    uid: opts.uid, name: opts.name ?? b.name, art: cls, cls, rarity,
+    uid: opts.uid, name: opts.name ?? b.name, art: opts.art ?? cls, cls, rarity,
     hp: Math.round(b.hp * k * HP_SCALE), atk: Math.round(b.atk * k), spd: b.spd, range: b.range, move: b.move,
     ability: opts.ability ?? b.ability, size: b.size ?? 1, collection: opts.collection ?? null, source: opts.source ?? 'guest',
   };
@@ -98,13 +101,13 @@ export function makeMonster(id: MonsterId, level: number, uid: string, opts: { b
  * The unit-card AWIs in TheoSwap config "Altered Arena Unit Cards" (game 8): config itemId → class, name, ability.
  * Two units per class; same stats per class, different ability.
  */
-export const UNIT_ITEMS: Record<string, { cls: ClassId; name: string; ability: AbilityId }> = {
+export const UNIT_ITEMS: Record<string, { cls: ClassId; name: string; ability: AbilityId; art?: ArtId }> = {
   unit_knight: { cls: 'warrior', name: 'Knight', ability: 'shieldBash' },
   unit_berserker: { cls: 'warrior', name: 'Berserker', ability: 'whirlwind' },
   unit_archer: { cls: 'ranger', name: 'Archer', ability: 'volley' },
   unit_sniper: { cls: 'ranger', name: 'Sniper', ability: 'aimedShot' },
   unit_pyromancer: { cls: 'mage', name: 'Pyromancer', ability: 'fireball' },
-  unit_frostmage: { cls: 'mage', name: 'Frost Mage', ability: 'frostNova' },
+  unit_frostmage: { cls: 'mage', name: 'Frost Mage', ability: 'frostNova', art: 'frostmage' },
   unit_cleric: { cls: 'healer', name: 'Cleric', ability: 'mend' },
   unit_druid: { cls: 'healer', name: 'Druid', ability: 'regrowth' },
   unit_assassin: { cls: 'rogue', name: 'Assassin', ability: 'backstab' },

@@ -14,8 +14,12 @@ npm run build    # static site in dist/
 npm run sim      # balance check: every team vs every stage, no browser
 ```
 
-Controls: taps only. Tap a stage, tap **Fight**, tap cards to build your team, tap **Fight** again. ×1/×2 speeds up a battle.
+Controls: taps only. Tap a stage, tap **Fight**, tap cards to build your team (slot 1 is the front row), tap **Fight** again.
+In battle, tap a glowing **TAP!** card to cast its ability now for +15% (or it casts by itself after 3 s). ×1/×2 speeds up a battle.
 Keyboard: Space = Fight, M = mute.
+
+Modes: the **ladder** (10 stages; pick 1 of 3 rewards after each new stage cleared, kept until you lose), the **daily challenge**
+(one shared fight per day, shareable result) and **friend battles** (send your team as a code like `ABC-1234` or a `?vs=CODE` link).
 
 ## Art: read [ASSETS.md](ASSETS.md)
 

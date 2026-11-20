@@ -7,6 +7,7 @@ import { BattleScene } from './scenes/BattleScene.ts';
 import { ResultScene } from './scenes/ResultScene.ts';
 import { ConnectScene } from './scenes/ConnectScene.ts';
 import { RevealScene } from './scenes/RevealScene.ts';
+import { FriendScene } from './scenes/FriendScene.ts';
 import { initAudio } from './systems/audio.ts';
 import './systems/install.ts'; // listen for the browser's install prompt from the very first moment
 
@@ -24,7 +25,7 @@ const game = new Phaser.Game({
   banner: false,
   audio: { noAudio: true }, // sound is our own Web Audio synth (src/systems/audio.ts)
   dom: { createContainer: true }, // the user-code field on the Connect screen
-  scene: [BootScene, MenuScene, ConnectScene, RevealScene, TeamScene, BattleScene, ResultScene],
+  scene: [BootScene, MenuScene, ConnectScene, RevealScene, FriendScene, TeamScene, BattleScene, ResultScene],
 });
 
 initAudio();

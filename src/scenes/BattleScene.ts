@@ -1,9 +1,10 @@
 import Phaser from 'phaser';
 import { GAME_W, GAME_H, COLORS, DEBUG } from '../config.ts';
 import { button, muteButton, text } from '../ui.ts';
-import { stage as getStage, type Stage } from '../battle/stages.ts';
-import { ABILITIES, BONUS_INFO, type UnitDef } from '../battle/units.ts';
-import { Battle, STEP, SUDDEN_DEATH_AT, TIME_LIMIT, type BEvent, type Fighter, type Projectile, type State } from '../battle/sim.ts';
+import { ABILITIES, BONUS_INFO, RARITY_COLOR, type UnitDef } from '../battle/units.ts';
+import { AUTO_CAST, Battle, STEP, SUDDEN_DEATH_AT, TAP_POWER, TIME_LIMIT, type BEvent, type Fighter, type Projectile, type State } from '../battle/sim.ts';
+import { fightFor, ladder, type Fight, type Mode } from '../modes/fight.ts';
+import { hex } from '../ui.ts';
 import { animSeconds } from '../assets.ts';
 import { sfx, startMusic, stopMusic } from '../systems/audio.ts';
 
@@ -19,6 +20,7 @@ interface View {
   en: Phaser.GameObjects.Rectangle;
   stun: Phaser.GameObjects.Sprite;
   anim: string;
+  aura?: Phaser.GameObjects.Ellipse;
   flashT: number;
   lagHp: number;
   deadT: number;
@@ -26,8 +28,12 @@ interface View {
 
 /** Draws a Battle. The sim runs at a fixed 60 Hz; this scene only turns its state and events into pictures and sound. */
 export class BattleScene extends Phaser.Scene {
-  private st!: Stage;
+  private fight!: Fight;
   private team!: UnitDef[];
+  private startEnergy = 0;
+  private hitStop = 0;
+  private slots: { f: Fighter; bg: Phaser.GameObjects.Rectangle; glow: Phaser.GameObjects.Rectangle; tap: Phaser.GameObjects.Text; wait: Phaser.GameObjects.Rectangle }[] = [];
+  private tapHint?: Phaser.GameObjects.Text;
   private battle!: Battle;
   private views = new Map<number, View>();
   private shots = new Map<number, Phaser.GameObjects.Image>();
@@ -46,9 +52,11 @@ export class BattleScene extends Phaser.Scene {
 
   constructor() { super('Battle'); }
 
-  init(data: { stage: number; team: UnitDef[] }): void {
-    this.st = getStage(data.stage);
+  init(data: { stage?: number; mode?: Mode; team: UnitDef[]; startEnergy?: number }): void {
+    this.fight = fightFor(data.mode ?? ladder(data.stage ?? 1)) ?? fightFor(ladder(1))!;
     this.team = data.team;
+    this.startEnergy = data.startEnergy ?? 0;
+    this.hitStop = 0; this.slots = []; this.tapHint = undefined;
     this.views.clear(); this.shots.clear();
     this.shotPool = []; this.fxPool = []; this.numPool = [];
     this.acc = 0; this.started = false; this.ended = false; this.shownSec = -1; this.lastSfx = {};
@@ -56,7 +64,7 @@ export class BattleScene extends Phaser.Scene {
 
   create(): void {
     this.add.image(GAME_W / 2, GAME_H / 2, 'bg.arena');
-    this.battle = new Battle(this.team, this.st.enemies, (Date.now() & 0xffff) + 1);
+    this.battle = new Battle(this.team, this.fight.enemies, this.fight.seed ?? (Date.now() & 0xffff) + 1, { manual: true, startEnergy: this.startEnergy });
     for (const f of this.battle.fighters) this.addView(f);
 
     this.sparks = this.add.particles(0, 0, 'fx.dot', {
@@ -65,8 +73,9 @@ export class BattleScene extends Phaser.Scene {
     }).setDepth(5000);
 
     // HUD
-    text(this, 30, 40, `STAGE ${this.st.n}`, 22, '#ff8fa3', '900');
-    text(this, 30, 70, this.st.name, 20, COLORS.dim, '700');
+    const m = this.fight.mode;
+    text(this, 30, 40, m.kind === 'ladder' ? `STAGE ${m.stage}` : m.kind === 'friend' ? 'FRIEND BATTLE' : 'DAILY', 22, '#ff8fa3', '900');
+    text(this, 30, 70, this.fight.sub, 20, COLORS.dim, '700');
     this.timerText = text(this, GAME_W / 2, 70, '0:30', 48, '#ffffff', '900').setOrigin(0.5).setStroke('#000000', 6).setDepth(6000);
     muteButton(this, GAME_W - 50, 60).setDepth(6000);
     const sp = button(this, GAME_W - 140, 60, '×1', () => { this.speed = this.speed === 1 ? 2 : 1; sp.label.setText(`×${this.speed}`); }, 90, 60, COLORS.panel, 28);
@@ -75,23 +84,66 @@ export class BattleScene extends Phaser.Scene {
     const bonuses = this.battle.bonuses;
     const line = bonuses.length
       ? bonuses.map((b) => `◆ ${b.collection.name}: +${Math.round(b.pct * 100)}% ${BONUS_INFO[b.kind].stat}`).join('   ')
-      : 'Tap ×1 to speed up';
+      : 'Tap a glowing unit to cast its ability';
     text(this, GAME_W / 2, 1100, line, 20, bonuses.length ? '#ffc94d' : COLORS.dim, '700').setOrigin(0.5);
     this.teamStrip();
 
     if (DEBUG) this.fpsText = text(this, 30, 1240, '', 18, '#7dffcf', '700').setDepth(9999);
-    this.countdown();
+    if (this.fight.boss) this.bossIntro(); else this.countdown();
   }
 
-  /** Your three units along the bottom, with live health. */
+  /** Stage 10: the camera finds the boss, it roars, then the countdown. */
+  private bossIntro(): void {
+    const boss = this.battle.fighters.find((f) => f.def.boss);
+    if (!boss) { this.countdown(); return; }
+    const cam = this.cameras.main;
+    cam.pan(boss.x, boss.y - 60, 500, 'Cubic.easeOut');
+    cam.zoomTo(1.6, 500, 'Cubic.easeOut');
+    this.time.delayedCall(550, () => {
+      cam.shake(500, 0.012); sfx.stomp(); sfx.crash();
+      // the camera is zoomed 1.6× here and zooms this banner too: 40 px shows at 64
+      const t = this.banner(boss.def.name.toUpperCase(), '#ff6b3d', 420, 40);
+      t.setScrollFactor(0);
+      this.tweens.add({ targets: t, alpha: 0, delay: 900, duration: 300, onComplete: () => t.destroy() });
+    });
+    this.time.delayedCall(1700, () => {
+      cam.pan(GAME_W / 2, GAME_H / 2, 450, 'Cubic.easeInOut');
+      cam.zoomTo(1, 450, 'Cubic.easeInOut');
+    });
+    this.time.delayedCall(2200, () => this.countdown());
+  }
+
+  /** Your three units along the bottom. When one's ability is ready it glows: tap it (or the unit) to cast. */
   private teamStrip(): void {
     this.battle.fighters.filter((f) => f.side === 0).forEach((f, i) => {
       const x = 130 + i * 230, y = 1190;
-      this.add.rectangle(x, y, 210, 110, COLORS.panel, 0.85).setStrokeStyle(2, COLORS.panelEdge, 0.4);
-      this.add.sprite(x - 60, y + 46, `unit.${f.def.art}.idle`, 0).setOrigin(0.5, 1).setScale(0.7);
-      text(this, x - 10, y - 34, f.def.name, 19, '#ffffff', '800');
-      if (f.def.ability) text(this, x - 10, y - 8, ABILITIES[f.def.ability].name, 15, COLORS.dim, '700');
+      const glow = this.add.rectangle(x, y, 222, 122, 0xffd23f, 0.0).setStrokeStyle(4, 0xffd23f, 0);
+      const bg = this.add.rectangle(x, y, 210, 110, COLORS.panel, 0.85).setStrokeStyle(2, COLORS.panelEdge, 0.4);
+      this.add.sprite(x - 60, y + 46, `unit.${f.def.art}.idle`, 0).setOrigin(0.5, 1).setScale(0.45);
+      const name = text(this, x - 22, y - 34, f.def.name, 19, '#ffffff', '800');
+      if (name.width > 120) name.setScale(120 / name.width);
+      if (f.def.ability) text(this, x - 22, y - 8, ABILITIES[f.def.ability].name, 15, COLORS.dim, '700');
+      const tap = text(this, x + 30, y + 30, 'TAP!', 22, '#ffd23f', '900').setOrigin(0.5).setStroke('#000000', 5).setVisible(false);
+      const wait = this.add.rectangle(x - 105, y + 53, 0, 4, 0xffd23f).setOrigin(0, 0.5);
+      bg.setInteractive({ useHandCursor: true }).on('pointerdown', () => this.tapCast(f));
+      this.slots.push({ f, bg, glow, tap, wait });
     });
+  }
+
+  private tapCast(f: Fighter): void {
+    if (!this.started || this.battle.result) return;
+    if (this.battle.requestCast(f.id)) { sfx.tap(); this.tapHint?.destroy(); this.tapHint = undefined; }
+  }
+
+  private syncSlots(): void {
+    for (const s of this.slots) {
+      const ready = s.f.alive && s.f.energy >= 100 && !!s.f.def.ability && !s.f.queued;
+      const pulse = 0.55 + 0.45 * Math.sin(this.time.now / 120);
+      s.glow.setStrokeStyle(4, 0xffd23f, ready ? pulse : 0);
+      s.tap.setVisible(ready).setScale(ready ? 0.9 + 0.15 * pulse : 1);
+      s.wait.width = ready ? 210 * (1 - s.f.readyT / AUTO_CAST) : 0;
+      s.bg.setAlpha(s.f.alive ? 1 : 0.4);
+    }
   }
 
   private countdown(): void {
@@ -128,7 +180,14 @@ export class BattleScene extends Phaser.Scene {
     const en = this.add.rectangle(0, 0, 0, 4, 0xffd23f).setOrigin(0, 0.5);
     const stun = this.add.sprite(0, 0, 'fx.stun').play('fx.stun').setVisible(false);
     if (f.def.boss) spr.setTint(0xffe0a0);
-    const v: View = { f, spr, shadowY: 0, hpBg, hp, hpLag, en, stun, anim: key, flashT: 0, lagHp: f.hp, deadT: 0 };
+    // Legendary units (and the boss) stand in a pulsing glow
+    let aura: Phaser.GameObjects.Ellipse | undefined;
+    if (f.def.rarity === 'Legendary') {
+      aura = this.add.ellipse(f.x, f.y, 110 * f.def.size, 34 * f.def.size, f.def.boss ? 0xff4d2e : RARITY_COLOR.Legendary, 0.45).setBlendMode(Phaser.BlendModes.ADD);
+      this.tweens.add({ targets: aura, alpha: 0.15, scaleX: 1.15, yoyo: true, repeat: -1, duration: 700 });
+    }
+    if (f.side === 0) spr.setInteractive({ useHandCursor: true }).on('pointerdown', () => this.tapCast(f));
+    const v: View = { f, spr, shadowY: 0, hpBg, hp, hpLag, en, stun, anim: key, aura, flashT: 0, lagHp: f.hp, deadT: 0 };
     this.views.set(f.id, v);
     if (f.def.size < 1) { spr.setScale(0.2); this.tweens.add({ targets: spr, scale: f.def.size, duration: 250, ease: 'Back.Out' }); }
   }
@@ -146,6 +205,7 @@ export class BattleScene extends Phaser.Scene {
     for (const v of this.views.values()) {
       const f = v.f, s = f.def.size;
       v.spr.setPosition(f.x, f.y).setDepth(f.y).setFlipX(f.facing < 0);
+      if (v.aura) v.aura.setPosition(f.x, f.y - 4).setDepth(f.y - 1).setVisible(f.alive);
       if (f.alive) {
         if (f.state !== 'attack' && !(v.anim.endsWith('.attack') && v.spr.anims.isPlaying)) this.play(v, f.state);
       } else {
@@ -215,8 +275,8 @@ export class BattleScene extends Phaser.Scene {
     f();
   }
 
-  private banner(s: string, color: string, y = 610): Phaser.GameObjects.Text {
-    const t = text(this, GAME_W / 2, y, s, 64, color, '900').setOrigin(0.5).setStroke('#1a1030', 10).setDepth(7000);
+  private banner(s: string, color: string, y = 610, size = 64): Phaser.GameObjects.Text {
+    const t = text(this, GAME_W / 2, y, s, size, color, '900').setOrigin(0.5).setStroke('#1a1030', 10).setDepth(7000);
     this.pop(t);
     return t;
   }
@@ -235,7 +295,7 @@ export class BattleScene extends Phaser.Scene {
         if (v) { v.spr.setTintFill(0xffffff); v.flashT = 70; }
         if (e.src.range < 150 && !e.ability) this.fx('fx.slash', e.f.x, hy, e.crit ? 1.3 : 1);
         this.burst(e.f.x, hy, e.f.side === 0 ? 0xff8fa3 : 0xfff1c0, e.crit ? 10 : 5);
-        if (e.crit) this.cameras.main.shake(90, 0.004);
+        if (e.crit) { this.cameras.main.shake(90, 0.004); this.hitStop = Math.max(this.hitStop, 55); }
         this.snd('hit', () => (e.crit ? sfx.smash() : sfx.slash()));
         break;
       }
@@ -244,11 +304,23 @@ export class BattleScene extends Phaser.Scene {
         this.fx('fx.heal', e.f.x, e.f.y - 40 * e.f.def.size);
         this.snd('heal', sfx.heal);
         break;
+      case 'ready':
+        this.snd('ready', sfx.coin);
+        if (!this.tapHint && !localStorage.getItem('altered-arena.tapped')) {
+          this.tapHint = text(this, GAME_W / 2, 1100, '👇 Tap a glowing unit to cast! (it casts by itself after 3 s)', 20, '#ffd23f', '800').setOrigin(0.5).setStroke('#000000', 5).setDepth(6500);
+          this.tweens.add({ targets: this.tapHint, scale: 1.06, yoyo: true, repeat: -1, duration: 400 });
+        }
+        break;
       case 'cast': {
         const v = this.views.get(e.f.id);
         if (v && e.ability !== 'split') this.play(v, 'attack', true);
-        const t = text(this, e.f.x, e.f.y - 150 * e.f.def.size, ABILITIES[e.ability].name + '!', 24, e.f.side === 0 ? '#ffe58a' : '#ffb0b8', '900').setOrigin(0.5).setStroke('#000000', 5).setDepth(5600);
-        this.tweens.add({ targets: t, y: t.y - 30, alpha: 0, delay: 500, duration: 400, onComplete: () => t.destroy() });
+        if (e.f.side === 0) this.castBanner(e.f, e.ability, e.tapped);
+        else {
+          const t = text(this, e.f.x, e.f.y - 150 * e.f.def.size, ABILITIES[e.ability].name + '!', 24, '#ffb0b8', '900').setOrigin(0.5).setStroke('#000000', 5).setDepth(5600);
+          this.tweens.add({ targets: t, y: t.y - 30, alpha: 0, delay: 500, duration: 400, onComplete: () => t.destroy() });
+        }
+        if (e.tapped) { try { localStorage.setItem('altered-arena.tapped', '1'); } catch { /* private mode */ } }
+        this.hitStop = Math.max(this.hitStop, e.f.side === 0 ? 90 : 50);
         this.ring(e.f.x, e.f.y - 40 * e.f.def.size, e.f.side === 0 ? 0xffe58a : 0xff6b81, 70);
         this.snd('cast', sfx.cast);
         break;
@@ -291,6 +363,19 @@ export class BattleScene extends Phaser.Scene {
     }
   }
 
+  /** Your unit's ability: a strip slides in at the top with its name, and "WELL TIMED" for a tapped cast. */
+  private castBanner(f: Fighter, ability: keyof typeof ABILITIES, tapped: boolean): void {
+    const y = 160, col = RARITY_COLOR[f.def.rarity];
+    const c = this.add.container(-400, y).setDepth(6800);
+    c.add(this.add.rectangle(0, 0, 560, 64, 0x120d1f, 0.88).setStrokeStyle(3, col, 0.9));
+    c.add(this.add.sprite(-230, 30, `unit.${f.def.art}.idle`, 0).setOrigin(0.5, 1).setScale(0.42));
+    c.add(text(this, -180, -14, f.def.name, 18, hex(col), '800').setOrigin(0, 0.5));
+    c.add(text(this, -180, 12, `${ABILITIES[ability].name.toUpperCase()}!`, 26, '#ffffff', '900').setOrigin(0, 0.5));
+    if (tapped) c.add(text(this, 250, 0, `WELL TIMED\n+${Math.round((TAP_POWER - 1) * 100)}%`, 18, '#ffd23f', '900').setOrigin(1, 0.5).setAlign('right'));
+    this.tweens.add({ targets: c, x: GAME_W / 2, duration: 220, ease: 'Back.Out' });
+    this.tweens.add({ targets: c, x: GAME_W + 400, delay: 1000, duration: 220, ease: 'Cubic.In', onComplete: () => c.destroy() });
+  }
+
   private addShot(p: Projectile): void {
     const key = p.kind === 'arrow' ? 'fx.arrow' : 'fx.orb';
     const img = this.shotPool.pop() ?? this.add.image(0, 0, key);
@@ -312,7 +397,7 @@ export class BattleScene extends Phaser.Scene {
     const mvp = this.battle.fighters.filter((f) => f.side === 0).reduce((a, b) => (b.dealt + b.healed > a.dealt + a.healed ? b : a));
     const timedOut = this.battle.time >= TIME_LIMIT;
     this.time.delayedCall(1600, () => this.scene.start('Result', {
-      stage: this.st.n, win, survivors, time: this.battle.time, timedOut, team: this.team,
+      mode: this.fight.mode, win, survivors, time: this.battle.time, timedOut, team: this.team,
       mvp: { uid: mvp.def.uid, dealt: Math.round(mvp.dealt), healed: Math.round(mvp.healed) },
     }));
   }
@@ -321,7 +406,8 @@ export class BattleScene extends Phaser.Scene {
 
   update(_t: number, delta: number): void {
     const dt = Math.min(delta, 100);
-    if (this.started && !this.battle.result) {
+    if (this.hitStop > 0) this.hitStop -= dt; // a few frames' pause on crits and abilities (doesn't change the fight)
+    else if (this.started && !this.battle.result) {
       this.acc += (dt / 1000) * this.speed;
       let steps = 0;
       while (this.acc >= STEP && steps < 8) {
@@ -333,6 +419,7 @@ export class BattleScene extends Phaser.Scene {
       if (steps === 8) this.acc = 0;
     }
     this.sync(dt);
+    this.syncSlots();
     const left = this.battle.time < SUDDEN_DEATH_AT ? Math.ceil(SUDDEN_DEATH_AT - this.battle.time) : Math.ceil(TIME_LIMIT - this.battle.time);
     if (left !== this.shownSec) {
       this.shownSec = left;

@@ -4,6 +4,10 @@
 // Each side's units walk to the nearest enemy and attack when in range. Every attack and every hit
 // taken charges energy; at 100 the unit casts its one ability. At 30 s "sudden death" starts and all
 // damage ramps up; at 45 s the side with more health left (as a share of its total) wins.
+//
+// Heroes stand in rows: the first team slot is the FRONT (centre, takes less damage), the other two the BACK.
+// In manual mode the player's units wait with a full ability bar until the player taps them (a tapped cast is
+// a bit stronger) or AUTO_CAST seconds pass. `npm run sim` uses auto mode: abilities fire as soon as they are ready.
 import { RARITY_POWER, teamBonuses, type AbilityId, type TeamBonus, type UnitDef } from './units.ts';
 
 export const ARENA = { left: 50, right: 670, top: 200, bottom: 1010 };
@@ -14,6 +18,9 @@ const SWING = 0.21;     // attack wind-up: the hit lands on frame 3 of the 6-fra
 const ENERGY_ON_ATTACK = 14;
 const ENERGY_ON_HIT = 55; // × share of max health lost
 const BODY = 30;          // body radius at size 1
+export const AUTO_CAST = 3; // manual mode: seconds a full ability bar waits for a tap before casting by itself
+export const TAP_POWER = 1.15; // a tapped cast is this much stronger
+export const FRONT_GUARD = 0.8; // the front-row unit takes this share of damage
 
 export type Side = 0 | 1; // 0 = player (bottom), 1 = enemy (top)
 export type State = 'idle' | 'walk' | 'attack' | 'hurt' | 'dead';
@@ -37,6 +44,9 @@ export interface Fighter {
   atkMul: number; atkMulT: number;
   spdMul: number; spdMulT: number;
   splitDone: boolean;
+  guard: number;       // damage taken multiplier (front row 0.8)
+  readyT: number;      // manual mode: seconds the ability has been ready
+  queued: boolean;     // manual mode: the player tapped this unit; cast as soon as it can
   alive: boolean;
   dealt: number; healed: number;
   slot: number;
@@ -52,7 +62,8 @@ export type BEvent =
   | { t: 'attack'; f: Fighter }
   | { t: 'damage'; f: Fighter; src: Fighter; amount: number; crit: boolean; ability: boolean }
   | { t: 'heal'; f: Fighter; amount: number }
-  | { t: 'cast'; f: Fighter; ability: AbilityId }
+  | { t: 'cast'; f: Fighter; ability: AbilityId; tapped: boolean }
+  | { t: 'ready'; f: Fighter }
   | { t: 'stun'; f: Fighter; dur: number }
   | { t: 'blink'; f: Fighter; fromX: number; fromY: number }
   | { t: 'shot'; p: Projectile }
@@ -77,8 +88,15 @@ export function rng(seed: number): () => number {
   };
 }
 
-/** Where units stand at the start. Player row at the bottom (left/centre/right), enemies at the top. */
+/** Heroes in a team of 3 stand in rows: slot 0 front centre, slots 1–2 back left / right. */
+export const usesRows = (def: UnitDef, n: number) => !!def.cls && n === 3;
+
+/** Where units stand at the start. Player at the bottom, enemies at the top (mirrored). */
 export function startPos(side: Side, i: number, n: number, def: UnitDef): { x: number; y: number } {
+  if (usesRows(def, n)) {
+    const x = [360, 200, 520][i], y = i === 0 ? 845 : 955;
+    return { x, y: side === 0 ? y : 1210 - y };
+  }
   const w = ARENA.right - ARENA.left;
   const x = ARENA.left + (w * (i + 1)) / (n + 1);
   const ranged = def.range > 150;
@@ -86,11 +104,18 @@ export function startPos(side: Side, i: number, n: number, def: UnitDef): { x: n
   return { x, y: ranged ? 270 : 350 };
 }
 
+export interface BattleOpts {
+  manual?: boolean;       // the player taps to cast (see AUTO_CAST)
+  startEnergy?: number;   // the player's units start with this much energy (run reward)
+}
+
 export class Battle {
   readonly fighters: Fighter[] = [];
   readonly projectiles: Projectile[] = [];
   readonly events: BEvent[] = [];
   readonly bonuses: TeamBonus[];
+  readonly enemyBonuses: TeamBonus[];
+  readonly manual: boolean;
   time = 0;
   result: Result | null = null;
   suddenDeath = false;
@@ -98,10 +123,12 @@ export class Battle {
   private readonly rand: () => number;
   private readonly startHp: [number, number] = [0, 0];
 
-  constructor(team: UnitDef[], enemies: UnitDef[], seed = 1) {
+  constructor(team: UnitDef[], enemies: UnitDef[], seed = 1, opts: BattleOpts = {}) {
     this.rand = rng(seed);
+    this.manual = !!opts.manual;
     this.bonuses = teamBonuses(team);
-    team.forEach((d, i) => this.add(d, 0, i, team.length));
+    this.enemyBonuses = teamBonuses(enemies);
+    team.forEach((d, i) => { const f = this.add(d, 0, i, team.length); f.energy = Math.max(f.energy, opts.startEnergy ?? 0); });
     enemies.forEach((d, i) => this.add(d, 1, i, enemies.length));
     for (const f of this.fighters) this.startHp[f.side] += f.maxHp;
   }
@@ -109,7 +136,7 @@ export class Battle {
   private add(def: UnitDef, side: Side, i: number, n: number, at?: { x: number; y: number }): Fighter {
     const p = at ?? startPos(side, i, n, def);
     let hp = def.hp, atk = def.atk, spd = def.spd, energy = 0;
-    if (side === 0) for (const b of this.bonuses) {
+    for (const b of side === 0 ? this.bonuses : this.enemyBonuses) {
       if (b.kind === 'vigor') hp *= 1 + b.pct;
       if (b.kind === 'might') atk *= 1 + b.pct;
       if (b.kind === 'haste') spd *= 1 + b.pct;
@@ -119,13 +146,22 @@ export class Battle {
       id: this.nextId++, def, side, x: p.x, y: p.y, hp: Math.round(hp), maxHp: Math.round(hp), atk, spd,
       range: def.range, move: def.move, energy, target: null, retarget: 0, cd: 0.3 + i * 0.12, swing: 0, stun: 0,
       state: 'idle', stateT: 0, facing: side === 0 ? 1 : -1, atkMul: 1, atkMulT: 0, spdMul: 1, spdMulT: 0,
-      splitDone: false, alive: true, dealt: 0, healed: 0, slot: i,
+      splitDone: false, guard: usesRows(def, n) && i === 0 && !at ? FRONT_GUARD : 1, readyT: 0, queued: false,
+      alive: true, dealt: 0, healed: 0, slot: i,
     };
     this.fighters.push(f);
     return f;
   }
 
   alive(side: Side): Fighter[] { return this.fighters.filter((f) => f.alive && f.side === side); }
+
+  /** Manual mode: the player tapped a unit. It casts as soon as it can (if its bar is full). */
+  requestCast(id: number): boolean {
+    const f = this.fighters.find((o) => o.id === id);
+    if (!f || !f.alive || f.side !== 0 || !f.def.ability || f.energy < 100 || f.queued) return false;
+    f.queued = true;
+    return true;
+  }
 
   /** Health left on a side, as a share of its starting total. */
   hpShare(side: Side): number {
@@ -187,7 +223,14 @@ export class Battle {
     }
     if (f.state === 'attack' && f.stateT < 0.42) return; // let the attack animation finish
 
-    if (f.energy >= 100 && f.def.ability && this.cast(f, t)) { f.energy = 0; return; }
+    if (f.energy >= 100 && f.def.ability) {
+      const waits = this.manual && f.side === 0 && !f.queued && f.def.ability !== 'split';
+      if (waits) {
+        if (f.readyT === 0) this.events.push({ t: 'ready', f });
+        f.readyT += dt;
+      }
+      if ((!waits || f.readyT >= AUTO_CAST) && this.cast(f, t)) { f.energy = 0; f.readyT = 0; f.queued = false; return; }
+    }
 
     const dx = t.x - f.x, dy = t.y - f.y, d = Math.hypot(dx, dy);
     const reach = f.range + BODY * (f.def.size + t.def.size) * 0.5;
@@ -210,7 +253,7 @@ export class Battle {
     f.energy = Math.min(100, f.energy + ENERGY_ON_ATTACK);
     if (!t.alive) return;
     if (f.range > 150) {
-      this.shoot(f, t, f.def.art === 'mage' || f.def.art === 'healer' ? 'orb' : 'arrow', this.roll(f.atk * f.atkMul), 0, false);
+      this.shoot(f, t, f.def.cls === 'mage' || f.def.cls === 'healer' ? 'orb' : 'arrow', this.roll(f.atk * f.atkMul), 0, false);
     } else this.damage(f, t, f.atk * f.atkMul, false);
   }
 
@@ -252,11 +295,11 @@ export class Battle {
   private damage(src: Fighter, t: Fighter, base: number, ability: boolean, rolled = false): void {
     if (!t.alive) return;
     let amount = rolled ? base : this.roll(base);
-    const critChance = src.def.art === 'rogue' ? 0.25 : 0.08;
+    const critChance = src.def.cls === 'rogue' ? 0.25 : 0.08;
     const crit = !ability && this.rand() < critChance;
     if (crit) amount *= 1.6;
     if (this.suddenDeath) amount *= 1 + (this.time - SUDDEN_DEATH_AT) * 0.15;
-    amount = Math.max(1, Math.round(amount));
+    amount = Math.max(1, Math.round(amount * t.guard));
     t.hp -= amount;
     src.dealt += amount;
     t.energy = Math.min(100, t.energy + (ENERGY_ON_HIT * amount) / t.maxHp);
@@ -283,14 +326,15 @@ export class Battle {
   private split(t: Fighter): void {
     const d: UnitDef = { ...t.def, uid: t.def.uid + ':s', name: `Little ${t.def.name}`, hp: Math.round(t.def.hp * 0.4), atk: Math.round(t.def.atk * 0.6), size: t.def.size * 0.7, ability: null };
     const f = this.add(d, t.side, t.slot, 1, { x: Math.min(ARENA.right, Math.max(ARENA.left, t.x + (t.x < 360 ? 40 : -40))), y: t.y - 10 });
-    this.events.push({ t: 'cast', f: t, ability: 'split' });
+    this.events.push({ t: 'cast', f: t, ability: 'split', tapped: false });
     this.events.push({ t: 'spawn', f });
   }
 
   /** Use the unit's ability. Returns false if it can't be used right now (it then attacks normally). */
   private cast(f: Fighter, t: Fighter): boolean {
     const ab = f.def.ability!;
-    const p = RARITY_POWER[f.def.rarity];
+    const tapped = f.queued && this.manual;
+    const p = RARITY_POWER[f.def.rarity] * (tapped ? TAP_POWER : 1);
     const legendary = f.def.rarity === 'Legendary';
     const foes = this.fighters.filter((o) => o.alive && o.side !== f.side);
     const friends = this.fighters.filter((o) => o.alive && o.side === f.side);
@@ -298,25 +342,25 @@ export class Battle {
     switch (ab) {
       case 'shieldBash': {
         if (!near) return false;
-        this.events.push({ t: 'cast', f, ability: ab });
+        this.events.push({ t: 'cast', f, ability: ab, tapped });
         this.damage(f, t, f.atk * f.atkMul * 1.8 * p, true);
         if (t.alive) { const d = 1.4 * p; t.stun = Math.max(t.stun, d); t.swing = 0; this.events.push({ t: 'stun', f: t, dur: d }); }
         break;
       }
       case 'volley': {
-        this.events.push({ t: 'cast', f, ability: ab });
+        this.events.push({ t: 'cast', f, ability: ab, tapped });
         const n = 5 + (f.def.rarity === 'Epic' ? 1 : legendary ? 2 : 0);
         for (let i = 0; i < n; i++) this.shoot(f, foes[Math.floor(this.rand() * foes.length)], 'arrow', this.roll(f.atk * f.atkMul * 0.65 * p), 0, true);
         break;
       }
       case 'fireball':
-        this.events.push({ t: 'cast', f, ability: ab });
+        this.events.push({ t: 'cast', f, ability: ab, tapped });
         this.shoot(f, t, 'fireball', this.roll(f.atk * f.atkMul * 2.0 * p), 120 * (legendary ? 1.2 : 1), true);
         break;
       case 'mend': {
         const hurt = friends.filter((o) => o.hp < o.maxHp);
         if (!hurt.length) return false;
-        this.events.push({ t: 'cast', f, ability: ab });
+        this.events.push({ t: 'cast', f, ability: ab, tapped });
         if (legendary) for (const o of friends) this.heal(o, o.maxHp * 0.22 * p, f);
         else { const lo = hurt.reduce((a, b) => (b.hp / b.maxHp < a.hp / a.maxHp ? b : a)); this.heal(lo, lo.maxHp * 0.38 * p, f); }
         break;
@@ -329,55 +373,55 @@ export class Battle {
         f.y = Math.min(ARENA.bottom, Math.max(ARENA.top, weak.y + behind * 50));
         f.target = weak; f.retarget = 1.5; f.facing = weak.x < f.x ? -1 : 1;
         this.events.push({ t: 'blink', f, fromX, fromY });
-        this.events.push({ t: 'cast', f, ability: ab });
+        this.events.push({ t: 'cast', f, ability: ab, tapped });
         this.damage(f, weak, f.atk * f.atkMul * 2.6 * p, true);
         break;
       }
       case 'drain': {
         if (!near) return false;
-        this.events.push({ t: 'cast', f, ability: ab });
+        this.events.push({ t: 'cast', f, ability: ab, tapped });
         const before = t.hp;
         this.damage(f, t, f.atk * f.atkMul * 1.6 * p, true);
         this.heal(f, before - t.hp, f);
         break;
       }
       case 'frenzy':
-        this.events.push({ t: 'cast', f, ability: ab });
+        this.events.push({ t: 'cast', f, ability: ab, tapped });
         f.spdMul = 1.6 * p; f.spdMulT = 4;
         this.events.push({ t: 'buff', f, kind: 'spd' });
         break;
       case 'warcry':
-        this.events.push({ t: 'cast', f, ability: ab });
+        this.events.push({ t: 'cast', f, ability: ab, tapped });
         for (const o of friends) { o.atkMul = 1.25 * p; o.atkMulT = 5; this.events.push({ t: 'buff', f: o, kind: 'atk' }); }
         break;
       case 'slam':
         if (!near) return false;
-        this.events.push({ t: 'cast', f, ability: ab });
+        this.events.push({ t: 'cast', f, ability: ab, tapped });
         this.explode(f, f.x, f.y, 130 * f.def.size, f.atk * f.atkMul * 1.4 * p, 'slam', 1.0);
         break;
       case 'whirlwind':
         if (!near) return false;
-        this.events.push({ t: 'cast', f, ability: ab });
+        this.events.push({ t: 'cast', f, ability: ab, tapped });
         this.explode(f, f.x, f.y, 125, f.atk * f.atkMul * 1.5 * p, 'spin');
         break;
       case 'aimedShot': {
         const weak = foes.reduce((a, b) => (b.hp < a.hp ? b : a));
-        this.events.push({ t: 'cast', f, ability: ab });
+        this.events.push({ t: 'cast', f, ability: ab, tapped });
         this.shoot(f, weak, 'arrow', this.roll(f.atk * f.atkMul * 3.4 * p), 0, true);
         break;
       }
       case 'frostNova':
-        this.events.push({ t: 'cast', f, ability: ab });
+        this.events.push({ t: 'cast', f, ability: ab, tapped });
         this.explode(f, t.x, t.y, 115 * (legendary ? 1.2 : 1), f.atk * f.atkMul * 1.7 * p, 'frost', 1.3 * p);
         break;
       case 'regrowth':
         if (!friends.some((o) => o.hp < o.maxHp)) return false;
-        this.events.push({ t: 'cast', f, ability: ab });
+        this.events.push({ t: 'cast', f, ability: ab, tapped });
         for (const o of friends) this.heal(o, o.maxHp * (legendary ? 0.2 : 0.15) * p, f);
         break;
       case 'flurry':
         if (!near) return false;
-        this.events.push({ t: 'cast', f, ability: ab });
+        this.events.push({ t: 'cast', f, ability: ab, tapped });
         for (let i = 0; i < 4 && t.alive; i++) this.damage(f, t, f.atk * f.atkMul * 1.05 * p, true);
         break;
       case 'split':
@@ -414,8 +458,8 @@ export class Battle {
 }
 
 /** Run a whole battle with no drawing (balance testing). */
-export function simulate(team: UnitDef[], enemies: UnitDef[], seed = 1): { result: Result; time: number; survivors: number } {
-  const b = new Battle(team, enemies, seed);
+export function simulate(team: UnitDef[], enemies: UnitDef[], seed = 1, opts: BattleOpts = {}): { result: Result; time: number; survivors: number } {
+  const b = new Battle(team, enemies, seed, opts);
   while (!b.result) { b.step(); b.events.length = 0; }
   return { result: b.result, time: b.time, survivors: b.alive(0).length };
 }

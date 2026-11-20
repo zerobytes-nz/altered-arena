@@ -6,7 +6,7 @@
 // their contents). Packs used (download them yourself, see PLAN.md → Art; none of these files may be committed):
 //   CraftPix Free RPG Monster Sprites Pixel Art     → monsters (lizard, drake, imp, medusa, jinn, dragon)
 //   CraftPix Knight Characters Free Sprite          → Warrior (silver), Ranger (bronze), Rogue (black)
-//   CraftPix Wizard Character Free Sprite           → Mage (fire wizard), Healer (purple wizard)
+//   CraftPix Wizard Character Free Sprite           → Mage (fire wizard), Healer (purple wizard), Frost Mage (ice wizard)
 //   Batareya Pixel Art CCG-like Frames              → card frames
 //   Free Pixel Magic Sprite Effects Pack            → slash, explosion, heal, stun effects
 //
@@ -99,7 +99,7 @@ const notes = [];
 // [pack folder, idle height in game pixels]; the halberd and spear make those two taller.
 const HEROES = {
   warrior: ['silver_knight', 108], ranger: ['bronze_knight', 128], rogue: ['black_knight', 124],
-  mage: ['wizard_fire', 110], healer: ['wizard', 106],
+  mage: ['wizard_fire', 110], healer: ['wizard', 106], frostmage: ['wizard_ice', 110],
 };
 const HERO_ANIM = { idle: 'IDLE', walk: 'WALK', attack: 'ATTACK', hurt: 'HURT', dead: 'DIE' };
 for (const [cls, [folder, height]] of Object.entries(HEROES)) {

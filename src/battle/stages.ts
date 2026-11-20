@@ -13,8 +13,8 @@ const LADDER: { name: string; line: Line }[] = [
   { name: 'Brass Lamp', line: ['imp', 'jinn', 'lizard'] },
   { name: 'Drake Roost', line: ['drake', 'medusa', 'drake', 'medusa'] },
   { name: 'Ember Hall', line: ['jinn', 'dragon', 'medusa'] },
-  { name: 'War Band', line: ['imp', 'jinn', 'medusa', 'drake'] },
   { name: 'Ash Peaks', line: ['dragon', 'medusa', 'jinn'] },
+  { name: 'War Band', line: ['imp', 'jinn', 'medusa', 'drake'] },
   { name: 'The Dragon King', line: ['medusa', 'dragon!', 'medusa'] },
 ];
 
